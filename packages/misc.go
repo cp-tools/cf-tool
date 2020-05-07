@@ -6,8 +6,6 @@ import (
 	"github.com/fatih/color"
 )
 
-// todo : Rename this file to something more suitable
-
 // Log is struct holding functions to print colored to stderr
 // (lightweight replacement for Logger)
 var (

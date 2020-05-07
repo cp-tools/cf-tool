@@ -63,8 +63,6 @@ type (
 	}
 )
 
-// @todo Rename this file (to something more sensible)
-
 // FindContestData extracts contest / problem id from path
 // and also determines the class (contest / gym) from the contest id
 func (opt *Opts) FindContestData() {

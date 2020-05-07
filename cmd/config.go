@@ -117,7 +117,7 @@ func addTmplt() {
 			Name: "alias",
 			Prompt: &survey.Input{
 				Message: "Template Alias:",
-				Help:    "TODO (Documentation)",
+				Help:    "Todo (Documentation)",
 			},
 			Validate: func(ans interface{}) error {
 				isPres := false
@@ -138,20 +138,20 @@ func addTmplt() {
 			Name: "prescript",
 			Prompt: &survey.Input{
 				Message: "Pre-script:",
-				Help:    "TODO (Documentation)",
+				Help:    "Todo (Documentation)",
 			},
 		}, {
 			Name: "script",
 			Prompt: &survey.Input{
 				Message: "Script:",
-				Help:    "TODO (Documentation)",
+				Help:    "Todo (Documentation)",
 			},
 			Validate: survey.Required,
 		}, {
 			Name: "postscript",
 			Prompt: &survey.Input{
 				Message: "Post-script:",
-				Help:    "TODO (Documentation)",
+				Help:    "Todo (Documentation)",
 			},
 		},
 	}, &tmplt)
@@ -222,7 +222,7 @@ func miscPrefs() {
 		// set GenOnFetch
 		err := survey.AskOne(&survey.Confirm{
 			Message: "Run gen after fetch?",
-			Help:    "TODO (Documentation)",
+			Help:    "Todo (Documentation)",
 			Default: false,
 		}, &cfg.Settings.GenOnFetch)
 		pkg.PrintError(err, "")
