@@ -1,0 +1,5 @@
+todo:
+  keyword: "@todo"
+  autoAssign: false
+  label: false
+  blobLines: 10
