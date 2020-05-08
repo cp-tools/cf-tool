@@ -124,7 +124,7 @@ func WatchContest(group, contest, contClass string) ([]Problem, error) {
 		data = append(data, Problem{
 			ID:     pkg.GetText(row, ".id"),
 			Name:   pkg.GetText(row, "td > div > div > a"),
-			Status: pkg.GetAttr(row, "", "class"),
+			Status: row.AttrOr("class", ""),
 			Count:  pkg.GetText(row, "td > a"),
 		})
 	})

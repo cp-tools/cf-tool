@@ -101,7 +101,7 @@ func (opt Opts) RunWatch() {
 				}
 			}
 			fmt.Println()
-			fmt.Fprintln(uiWriter, tbl.String())
+			fmt.Fprintln(uiWriter, tbl)
 			fmt.Println()
 
 			if isPending == false {
