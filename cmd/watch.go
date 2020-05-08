@@ -21,7 +21,7 @@ func (opt Opts) RunWatch() {
 		return
 	}
 	// header formatting for table
-	headerfmt := color.New(color.FgBlue, color.Bold, color.Underline).SprintfFunc()
+	headerfmt := pkg.Blue.Add(color.Underline).SprintfFunc()
 
 	if opt.SubCnt == 0 {
 		// submissions aren't specified to be parsed
@@ -34,7 +34,7 @@ func (opt Opts) RunWatch() {
 		// init table with header + color
 		tbl := uitable.New()
 		tbl.AddRow(headerfmt("#"), headerfmt("Name"),
-			headerfmt("Status"), headerfmt("Count"))
+			headerfmt("  "), headerfmt("Count"))
 		tbl.MaxColWidth = 40
 		tbl.Separator = " | "
 
@@ -54,11 +54,11 @@ func (opt Opts) RunWatch() {
 			clean := func(status string) string {
 				switch status {
 				case "accepted-problem":
-					return color.New(color.BgGreen).Sprint("      ")
+					return pkg.Green.Sprint("AC")
 				case "rejected-problem":
-					return color.New(color.BgRed).Sprint("      ")
+					return pkg.Red.Sprint("RE")
 				default:
-					return color.New(color.BgWhite).Sprint("      ")
+					return "NA"
 				}
 			}
 			// insert row to table

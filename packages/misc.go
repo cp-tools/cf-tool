@@ -1,8 +1,11 @@
 package pkg
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/fatih/color"
 )
 
@@ -10,10 +13,10 @@ import (
 // (lightweight replacement for Logger)
 var (
 	writer = os.Stderr
-	green  = color.New(color.FgGreen)
-	blue   = color.New(color.FgBlue)
-	red    = color.New(color.FgRed)
-	yellow = color.New(color.FgYellow)
+	Green  = color.New(color.FgGreen)
+	Blue   = color.New(color.FgBlue)
+	Red    = color.New(color.FgRed)
+	Yellow = color.New(color.FgYellow)
 
 	Log struct {
 		Success, Notice, Info, Error,
@@ -22,11 +25,11 @@ var (
 )
 
 func init() {
-	Log.Success = func(text ...interface{}) { green.Fprintln(writer, text...) }
-	Log.Notice = func(text ...interface{}) { color.New().Fprintln(writer, text...) }
-	Log.Info = func(text ...interface{}) { blue.Fprintln(writer, text...) }
-	Log.Error = func(text ...interface{}) { red.Fprintln(writer, text...) }
-	Log.Warning = func(text ...interface{}) { yellow.Fprintln(writer, text...) }
+	Log.Success = func(text ...interface{}) { Green.Fprintln(writer, text...) }
+	Log.Notice = func(text ...interface{}) { fmt.Fprintln(writer, text...) }
+	Log.Info = func(text ...interface{}) { Blue.Fprintln(writer, text...) }
+	Log.Error = func(text ...interface{}) { Red.Fprintln(writer, text...) }
+	Log.Warning = func(text ...interface{}) { Yellow.Fprintln(writer, text...) }
 }
 
 // PrintError outputs error (with custom message)
@@ -50,4 +53,16 @@ func CreateFile(data, dst string) string {
 
 	out.WriteString(data)
 	return dst
+}
+
+// GetText extracts text from particular html data
+func GetText(sel *goquery.Selection, query string) string {
+	str := sel.Find(query).Text()
+	return strings.TrimSpace(str)
+}
+
+// GetAttr extracts attribute valur of particular html data
+func GetAttr(sel *goquery.Selection, query, attr string) string {
+	str := sel.Find(query).AttrOr(attr, "")
+	return strings.TrimSpace(str)
 }

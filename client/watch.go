@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/fatih/color"
 )
 
 type (
@@ -60,12 +59,6 @@ func WatchSubmissions(group, contest, contClass, query string) ([]Submission, er
 	sel := doc.Find("tr[data-submission-id]").Has(`a[href*="/` + strings.ToUpper(query) + `"]`)
 	sel.Each(func(_ int, row *goquery.Selection) {
 
-		getText := func(query string) string {
-			return strings.TrimSpace(row.Find(query).Text())
-		}
-		getAttr := func(query, attr string) string {
-			return strings.TrimSpace(row.Find(query).AttrOr(attr, ""))
-		}
 		// compress verdict and return color coded string
 		clean := func(verdict string) string {
 			verdict = strings.ReplaceAll(verdict, "Wrong answer", "WA")
@@ -74,28 +67,27 @@ func WatchSubmissions(group, contest, contClass, query string) ([]Submission, er
 
 			switch {
 			case strings.HasPrefix(verdict, "TLE"):
-				return color.YellowString(verdict)
+				return pkg.Yellow.Sprint(verdict)
 			case strings.HasPrefix(verdict, "MLE"):
-				return color.RedString(verdict)
+				return pkg.Red.Sprint(verdict)
 			case strings.HasPrefix(verdict, "WA"):
-				return color.RedString(verdict)
+				return pkg.Red.Sprint(verdict)
 			case strings.HasPrefix(verdict, "Accepted"):
-				return color.GreenString(verdict)
+				return pkg.Green.Sprint(verdict)
 			default:
 				return verdict
 			}
 		}
 
-		when := strings.TrimSpace(row.Find("td").First().Next().Text())
 		data = append(data, Submission{
-			ID:      getText(".id-cell"),
-			When:    when,
-			Name:    getText("td[data-problemId]"),
-			Lang:    getText("td:not([class])"),
-			Waiting: getAttr(".status-cell", "waiting"),
-			Verdict: clean(getText(".status-verdict-cell")),
-			Time:    getText(".time-consumed-cell"),
-			Memory:  getText(".memory-consumed-cell"),
+			ID:      pkg.GetText(row, ".id-cell"),
+			When:    pkg.GetText(row.Find("td").First().Next(), ""),
+			Name:    pkg.GetText(row, "td[data-problemId]"),
+			Lang:    pkg.GetText(row, "td:not([class])"),
+			Waiting: pkg.GetAttr(row, ".status-cell", "waiting"),
+			Verdict: clean(pkg.GetText(row, ".status-verdict-cell")),
+			Time:    pkg.GetText(row, ".time-consumed-cell"),
+			Memory:  pkg.GetText(row, ".memory-consumed-cell"),
 		})
 	})
 
@@ -129,15 +121,11 @@ func WatchContest(group, contest, contClass string) ([]Problem, error) {
 	doc, _ := goquery.NewDocumentFromReader(bytes.NewReader(body))
 	doc.Find(".problems tr").Has("td").Each(func(_ int, row *goquery.Selection) {
 
-		getText := func(query string) string {
-			return strings.TrimSpace(row.Find(query).Text())
-		}
-
 		data = append(data, Problem{
-			ID:     getText(".id"),
-			Name:   getText("td > div > div > a"),
-			Status: row.AttrOr("class", ""),
-			Count:  getText("td > a"),
+			ID:     pkg.GetText(row, ".id"),
+			Name:   pkg.GetText(row, "td > div > div > a"),
+			Status: pkg.GetAttr(row, "", "class"),
+			Count:  pkg.GetText(row, "td > a"),
 		})
 	})
 	return data, nil

@@ -198,7 +198,7 @@ func Validator(out, ans string, igCase bool, exp int) (string, string) {
 // prints input data, and then the diff of out vs ans
 // prints all data to stderr, since it's debugging info
 func PrintDiff(inp, out, ans string) {
-	headerfmt := color.New(color.FgBlue, color.Bold, color.Underline).SprintfFunc()
+	headerfmt := pkg.Blue.Add(color.Underline).SprintfFunc()
 	// print input data
 	fmt.Fprintln(os.Stderr, headerfmt("Input"))
 	fmt.Fprintln(os.Stderr, inp)
