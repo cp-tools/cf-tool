@@ -81,7 +81,7 @@ func WatchSubmissions(group, contest, contClass, query string) ([]Submission, er
 
 		data = append(data, Submission{
 			ID:      pkg.GetText(row, ".id-cell"),
-			When:    pkg.GetText(row.Find("td").First().Next(), ""),
+			When:    pkg.GetText(row.Find("td").First().Next(), "*"),
 			Name:    pkg.GetText(row, "td[data-problemId]"),
 			Lang:    pkg.GetText(row, "td:not([class])"),
 			Waiting: pkg.GetAttr(row, ".status-cell", "waiting"),

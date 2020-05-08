@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/gosuri/uilive"
 	"github.com/gosuri/uitable"
-	"github.com/k0kubun/go-ansi"
 )
 
 // RunWatch is called on running cf watch
@@ -64,29 +64,20 @@ func (opt Opts) RunWatch() {
 			// insert row to table
 			tbl.AddRow(prob.ID, prob.Name, clean(prob.Status), prob.Count)
 		}
+		fmt.Println()
 		fmt.Println(tbl)
+		fmt.Println()
+
 	} else {
 		// infinite loop till verdicts declared
-		for isFirst := true; true; isFirst = false {
+		uiWriter := uilive.New()
+		uiWriter.Start()
+		for {
 			// timer to fetch data in interval of 1 second
 			start := time.Now()
 			// fetch contest submission status
 			data, err := cln.WatchSubmissions(opt.group, opt.contest, opt.contClass, opt.problem)
 			pkg.PrintError(err, "Failed to extract submissions in contest")
-
-			// min function (since there golang lacks min/max uggh)
-			min := func(a, b int) int {
-				if a <= b {
-					return a
-				}
-				return b
-			}
-			if isFirst == false {
-				for i := 0; i <= min(opt.SubCnt, len(data)); i++ {
-					ansi.CursorPreviousLine(1)
-					ansi.EraseInLine(2)
-				}
-			}
 
 			// create new table
 			tbl := uitable.New()
@@ -109,7 +100,9 @@ func (opt Opts) RunWatch() {
 					isPending = true
 				}
 			}
-			fmt.Println(tbl)
+			fmt.Println()
+			fmt.Fprintln(uiWriter, tbl.String())
+			fmt.Println()
 
 			if isPending == false {
 				break
@@ -117,6 +110,7 @@ func (opt Opts) RunWatch() {
 
 			time.Sleep(time.Second - time.Since(start))
 		}
+		uiWriter.Stop()
 	}
 	return
 }

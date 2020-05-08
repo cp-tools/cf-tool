@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gosuri/uilive"
 	"github.com/gosuri/uitable"
-	"github.com/k0kubun/go-ansi"
 )
 
 // RunSubmit is called on running cf submit
@@ -68,18 +68,15 @@ func (opt Opts) RunSubmit() {
 
 func watch(group, contest, contClass, problem string) {
 	// infinite loop till verdicts declared
-	for isFirst := true; true; isFirst = false {
+	uiWriter := uilive.New()
+	uiWriter.Start()
+	for {
 		// fetch submission from contest every second
 		start := time.Now()
 
 		data, err := cln.WatchSubmissions(group, contest, contClass, problem)
 		pkg.PrintError(err, "Failed to extract submissions in contest.")
 		sub := data[0]
-
-		if isFirst == false {
-			ansi.CursorPreviousLine(1)
-			ansi.EraseInLine(2)
-		}
 
 		tbl := uitable.New()
 		tbl.Separator = " "
@@ -88,12 +85,13 @@ func watch(group, contest, contClass, problem string) {
 		if sub.Waiting == "false" {
 			tbl.AddRow("Memory:", sub.Memory)
 			tbl.AddRow("Time:", sub.Time)
-			fmt.Println(tbl)
+			fmt.Fprintln(uiWriter, tbl)
 			break
 		}
-		fmt.Println(tbl)
+		fmt.Fprintln(uiWriter, tbl)
 		// sleep for 1 second
 		time.Sleep(time.Second - time.Since(start))
 	}
+	uiWriter.Stop()
 	return
 }
