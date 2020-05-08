@@ -61,7 +61,7 @@ func (opt Opts) GenCode(t *cfg.Template, path string) {
 		name := e.ReplPlaceholder(fName)
 
 		// check if file already exists
-		if _, err := os.Stat(name); os.IsNotExist(err) {
+		if _, err := os.Stat(filepath.Join(path, name)); os.IsNotExist(err) {
 			pkg.CreateFile(source, filepath.Join(path, name))
 			pkg.Log.Notice("File " + name + " generated")
 			break
