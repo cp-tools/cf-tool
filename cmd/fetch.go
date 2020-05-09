@@ -44,6 +44,7 @@ func (opt Opts) RunFetch() {
 	if len(splInp) == 0 {
 		pkg.Log.Warning("Failed to fetch tests from problems page")
 		pkg.Log.Info("Fetching from page of every problem")
+		pkg.Log.Notice("Please be patient")
 		// iterate over all present problems
 		for _, prob := range probs {
 			// Problem isn't specified to be fetched
@@ -59,6 +60,12 @@ func (opt Opts) RunFetch() {
 			// append sample tests to slice
 			splInp = append(splInp, probInp...)
 			splOut = append(splOut, probOut...)
+			// if problem is pdf format (can't extract tests)
+			if len(probInp) == 0 {
+				pkg.Log.Warning("Unable to extract test(s) - " + prob)
+				splInp = append(splInp, make([]string, 0))
+				splOut = append(splOut, make([]string, 0))
+			}
 		}
 	}
 
