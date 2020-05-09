@@ -5,9 +5,7 @@ import (
 	pkg "cf/packages"
 
 	"bytes"
-	"errors"
 	"fmt"
-	"net/http"
 	"net/url"
 	"path"
 	"strings"
@@ -19,14 +17,15 @@ import (
 // FindCountdown parses countdown (if exists) from countdown page
 func FindCountdown(group, contest, contClass string, link url.URL) (int64, error) {
 	// This implementation contains redirection prevention
-	// To determine if contest exists or not
 	c := cfg.Session.Client
-	c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		return errors.New(contClass + " " + contest + " doesn't exist!")
-	}
+	c.CheckRedirect = pkg.RedirectCheck
 	link.Path = path.Join(link.Path, "countdown")
-	body, err := pkg.GetReqBody(c, link.String())
+	body, err := pkg.GetReqBody(&c, link.String())
 	if err != nil {
+		return 0, err
+	} else if len(body) == 0 {
+		// such page doesn't exist
+		err = fmt.Errorf("%v %v doesn't exist", contClass, contest)
 		return 0, err
 	}
 
@@ -56,7 +55,7 @@ func StartCountdown(dur int64) {
 func FetchProbs(group, contest, contClass string, link url.URL) ([]string, error) {
 	// no need of modifying link as it already points to dashboard
 	c := cfg.Session.Client
-	body, err := pkg.GetReqBody(c, link.String())
+	body, err := pkg.GetReqBody(&c, link.String())
 	if err != nil {
 		return nil, err
 	}
@@ -70,18 +69,28 @@ func FetchProbs(group, contest, contClass string, link url.URL) ([]string, error
 	return probs, nil
 }
 
-// FetchTests extracts test cases of the all problems in contest
+// FetchTests extracts test cases of the problem(s) in contest
 // Returns 2d slice mapping to input and output
+// If problem == "", fetch all problem test cases
+// else, only fetch of given problem.
+// fix for https://github.com/infixint943/cf/pull/2#issuecomment-626122011
 /*
 	@todo Add fallback to parsing from individual problems
 	@body if problems page can't be loaded, add ability to parse
 	@body tests from individual problems.
 */
-func FetchTests(group, contest, contClass string, link url.URL) ([][]string, [][]string, error) {
+func FetchTests(group, contest, contClass, problem string, link url.URL) ([][]string, [][]string, error) {
 
 	c := cfg.Session.Client
-	link.Path = path.Join(link.Path, "problems")
-	body, err := pkg.GetReqBody(c, link.String())
+	if problem == "" {
+		// fetch from problems page
+		link.Path = path.Join(link.Path, "problems")
+	} else {
+		// fetch from individual problem page
+		link.Path = path.Join(link.Path, "problem", problem)
+	}
+
+	body, err := pkg.GetReqBody(&c, link.String())
 	if err != nil {
 		return nil, nil, err
 	}

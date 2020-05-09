@@ -23,7 +23,7 @@ func Login(usr, passwd string) (bool, error) {
 
 	link, _ := url.Parse(cfg.Settings.Host)
 	link.Path = path.Join(link.Path, "enter")
-	body, err := pkg.GetReqBody(c, link.String())
+	body, err := pkg.GetReqBody(&c, link.String())
 	if err != nil {
 		return false, err
 	}
@@ -34,7 +34,7 @@ func Login(usr, passwd string) (bool, error) {
 	bfaa := "883b704dbe5c70e1e61de4d8aff2da32"
 
 	// Post form (aka login using creds)
-	body, err = pkg.PostReqBody(c, link.String(), url.Values{
+	body, err = pkg.PostReqBody(&c, link.String(), url.Values{
 		"csrf_token":    {csrf},
 		"action":        {"enter"},
 		"ftaa":          {ftaa},
@@ -70,7 +70,7 @@ func LoggedInUsr() (string, error) {
 	// fetch home page and check if logged in
 	c := cfg.Session.Client
 	link, _ := url.Parse(cfg.Settings.Host)
-	body, err := pkg.GetReqBody(c, link.String())
+	body, err := pkg.GetReqBody(&c, link.String())
 	if err != nil {
 		return "", err
 	}

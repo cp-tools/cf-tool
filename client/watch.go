@@ -5,8 +5,7 @@ import (
 	pkg "cf/packages"
 
 	"bytes"
-	"errors"
-	"net/http"
+	"fmt"
 	"net/url"
 	"path"
 	"strings"
@@ -34,15 +33,16 @@ type (
 // query = submitID to fetch submission of given submission id
 func WatchSubmissions(group, contest, contClass, query string, link url.URL) ([]Submission, error) {
 	// This implementation contains redirection prevention
-	// To determine if contest exists or not
 	c := cfg.Session.Client
-	c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		return errors.New(contClass + " " + contest + " doesn't exist!")
-	}
+	c.CheckRedirect = pkg.RedirectCheck
 	// fetch all submissions in contest
 	link.Path = path.Join(link.Path, "my")
-	body, err := pkg.GetReqBody(c, link.String())
+	body, err := pkg.GetReqBody(&c, link.String())
 	if err != nil {
+		return nil, err
+	} else if len(body) == 0 {
+		// such page doesn't exist
+		err = fmt.Errorf("%v %v doesn't exist", contClass, contest)
 		return nil, err
 	}
 	// to hold all submissions
@@ -90,15 +90,15 @@ func WatchSubmissions(group, contest, contClass, query string, link url.URL) ([]
 // WatchContest parses contest solved count status
 func WatchContest(group, contest, contClass string, link url.URL) ([]Problem, error) {
 	// This implementation contains redirection prevention
-	// To determine if contest exists or not
 	c := cfg.Session.Client
-	c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		return errors.New(contClass + " " + contest + " doesn't exist!")
-	}
-	// link isn't modified since it points to contest dashboard
+	c.CheckRedirect = pkg.RedirectCheck
 	// fetch contest dashboard page
-	body, err := pkg.GetReqBody(c, link.String())
+	body, err := pkg.GetReqBody(&c, link.String())
 	if err != nil {
+		return nil, err
+	} else if len(body) == 0 {
+		// such page doesn't exist
+		err = fmt.Errorf("%v %v doesn't exist", contClass, contest)
 		return nil, err
 	}
 	// to hold all problems in contest

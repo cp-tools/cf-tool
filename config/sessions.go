@@ -18,7 +18,7 @@ var Session struct {
 	Handle  string         `json:"handle"`
 	Passwd  string         `json:"password"`
 	Cookies *cookiejar.Jar `json:"cookies"`
-	Client  *http.Client   `json:"-"`
+	Client  http.Client    `json:"-"`
 }
 
 var sessPath string
@@ -46,7 +46,7 @@ func InitSession(path string) {
 	}
 
 	// instantiate client with proxy configurations
-	Session.Client = &http.Client{Jar: Session.Cookies,
+	Session.Client = http.Client{Jar: Session.Cookies,
 		Transport: &http.Transport{Proxy: proxyURL}}
 }
 

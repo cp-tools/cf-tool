@@ -38,8 +38,29 @@ func (opt Opts) RunFetch() {
 	pkg.PrintError(err, "Extraction of contest problems failed")
 
 	// Fetch all tests from problems page
-	splInp, splOut, err := cln.FetchTests(opt.group, opt.contest, opt.contClass, opt.link)
-	pkg.PrintError(err, "Failed to extract sample tests.")
+	splInp, splOut, err := cln.FetchTests(opt.group, opt.contest, opt.contClass, "", opt.link)
+	pkg.PrintError(err, "Failed to extract sample tests")
+	// no sample tests found, try parsing from each problem
+	if len(splInp) == 0 {
+		pkg.Log.Warning("Failed to fetch tests from problems page")
+		pkg.Log.Info("Fetching from page of every problem")
+		// iterate over all present problems
+		for _, prob := range probs {
+			// Problem isn't specified to be fetched
+			if opt.problem != "" && prob != opt.problem {
+				// enter blank tests (as they aren't required)
+				splInp = append(splInp, make([]string, 0))
+				splOut = append(splOut, make([]string, 0))
+				continue
+			}
+			probInp, probOut, err := cln.FetchTests(opt.group,
+				opt.contest, opt.contClass, prob, opt.link)
+			pkg.PrintError(err, "Failed to extract sample tests of "+prob)
+			// append sample tests to slice
+			splInp = append(splInp, probInp...)
+			splOut = append(splOut, probOut...)
+		}
+	}
 
 	// iterate over fetched problems tests
 	for i, prob := range probs {

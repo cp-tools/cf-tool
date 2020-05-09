@@ -45,3 +45,8 @@ func FindCsrf(body []byte) string {
 	val, _ := doc.Find(".csrf-token").Attr("data-csrf")
 	return val
 }
+
+// RedirectCheck prevents redirection and returns requested page info
+func RedirectCheck(req *http.Request, via []*http.Request) error {
+	return http.ErrUseLastResponse
+}
