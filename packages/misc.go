@@ -55,6 +55,14 @@ func init() {
 	}
 }
 
+// IsAPI configures output settings based on flag
+func IsAPI(flag bool) {
+	// disable color
+	color.NoColor = flag
+	// disable line overwriting
+	LiveUI.isAPI = flag
+}
+
 // PrintError outputs error (with custom message)
 // and exits the program execution (if err != nil)
 func PrintError(err error, desc string) {

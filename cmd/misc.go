@@ -38,6 +38,7 @@ type (
 		SubCnt int    `docopt:"--submissions"`
 		Handle string `docopt:"--handle"`
 		Custom bool   `docopt:"--custom"`
+		API    bool   `docopt:"--api"`
 
 		contest   string
 		problem   string
