@@ -84,15 +84,16 @@ func main() {
 /*
 Global variables
   Generic:
-	- ${handle}				: username of currently logged in user session
-	- ${date}				: dd-mm-yy format of current date
-	- ${time}				: hh:mm:ss format of current time
+	- ${handle}             : username of currently logged in user session
+	- ${date}               : dd-mm-yy format of current date
+	- ${time}               : hh:mm:ss format of current time
 
 	Non-Generic:
-	- ${contest}			: The contest id parsed from args / folder path
-	- ${problem}			: The problem id parsed from args / folder path
-	- ${group}				: The group id parsed from folder path / url
-	- ${contClass}			: The class of the contest (contest / gym / group)
-	- ${idx}				: index of iteration (eg: c${idx} as name of gen file)
-	- ${file}				: file you wish to test / submit
+	- ${contest}            : The contest id parsed from args / folder path
+	- ${problem}            : The problem id parsed from args / folder path
+	- ${group}              : The group id parsed from folder path / url
+	- ${contClass}          : The class of the contest (contest / gym / group)
+	- ${idx}                : index of iteration (eg: c${idx} as name of gen file)
+	- ${file}               : file you wish to test / submit
+	- ${fileBase}           : file path (without extension) you wish to test / submit
 */
