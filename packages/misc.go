@@ -10,8 +10,7 @@ import (
 	"github.com/k0kubun/go-ansi"
 )
 
-// Log is struct holding functions to print colored to stderr
-// (lightweight replacement for Logger)
+// Global Variables for different UI formatting
 var (
 	writer = os.Stderr
 	Green  = color.New(color.FgGreen)
@@ -23,7 +22,7 @@ var (
 		Success, Notice, Info, Error,
 		Warning func(text ...interface{})
 	}
-
+	// LiveUI to print live data to terminal
 	LiveUI struct {
 		count int
 		isAPI bool

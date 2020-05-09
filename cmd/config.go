@@ -83,7 +83,7 @@ func addTmplt() {
 	for name := range cln.LangID {
 		lName = append(lName, name)
 	}
-
+	pkg.Log.Info("For detailed instructions, read https://github.com/infixint943/cf/wiki/Configuration")
 	tmplt := cfg.Template{}
 	err := survey.Ask([]*survey.Question{
 		{
@@ -98,7 +98,7 @@ func addTmplt() {
 			Prompt: &survey.Input{
 				Message: "Path to code template:",
 				Help: "The (relative/absolute) path to the template file you wish to use.\n" +
-					"Example of valid paths are : ~/Templates/default.cpp on linux/macOS\n" +
+					"Example of valid paths are : ~/Documents/default.cpp on linux/macOS\n" +
 					"and C:\\Users\\username\\Documents\\tmplt.py on windows",
 			},
 			Validate: func(ans interface{}) error {
@@ -117,7 +117,8 @@ func addTmplt() {
 			Name: "alias",
 			Prompt: &survey.Input{
 				Message: "Template Alias:",
-				Help:    "Todo (Documentation)",
+				Help: "A (unique) name by which you wish to recognize this template\n" +
+					"For example, 'Default (C++)', 'FFT Template', etc\n",
 			},
 			Validate: func(ans interface{}) error {
 				isPres := false
@@ -138,20 +139,28 @@ func addTmplt() {
 			Name: "prescript",
 			Prompt: &survey.Input{
 				Message: "Pre-script:",
-				Help:    "Todo (Documentation)",
+				Help: "Script to run (once) to compile source file\n" +
+					"For example, 'g++ -Wall ${file}', 'javac ${file}', etc\n" +
+					"For details on placeholders, visit wiki documentation\n" +
+					"Can be left blank, if source file can be run without compiling",
 			},
 		}, {
 			Name: "script",
 			Prompt: &survey.Input{
 				Message: "Script:",
-				Help:    "Todo (Documentation)",
+				Help: "Script to run binary/source file against test cases\n" +
+					"For example, './a.out', 'java ${fileBasename}', 'python ${file}' etc\n" +
+					"Field is required; Will be run once for each sample test case",
 			},
 			Validate: survey.Required,
 		}, {
 			Name: "postscript",
 			Prompt: &survey.Input{
 				Message: "Post-script:",
-				Help:    "Todo (Documentation)",
+				Help: "Script to cleanup any residual binary files, etc\n" +
+					"Run (once) after testing of all sample tests has finished\n" +
+					"For example, 'rm a.out', 'del ${fileBasename}', etc\n" +
+					"Can be left blank, if cleanup is required/desired",
 			},
 		},
 	}, &tmplt)
@@ -222,7 +231,8 @@ func miscPrefs() {
 		// set GenOnFetch
 		err := survey.AskOne(&survey.Confirm{
 			Message: "Run gen after fetch?",
-			Help:    "Todo (Documentation)",
+			Help: "If set to true, default template will be created for each fetched problem.\n" +
+				"Default template has to be configured for this feature to work",
 			Default: false,
 		}, &cfg.Settings.GenOnFetch)
 		pkg.PrintError(err, "")
