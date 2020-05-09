@@ -63,6 +63,7 @@ type (
 		ContClass string `env:"${contClass}"`
 		Idx       string `env:"${idx}"`
 		File      string `env:"${file}"`
+		FileBase  string `env:"${fileBase}"`
 	}
 )
 
@@ -177,6 +178,8 @@ func (e Env) ReplPlaceholder(text string) string {
 	if e.Idx == "0" {
 		e.Idx = ""
 	}
+	// extract file name from ${file} value
+	e.FileBase = strings.TrimSuffix(e.File, filepath.Ext(e.File))
 
 	// iterate over struct and replace variables
 	t := reflect.TypeOf(e)

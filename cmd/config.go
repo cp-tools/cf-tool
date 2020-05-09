@@ -149,7 +149,7 @@ func addTmplt() {
 			Prompt: &survey.Input{
 				Message: "Script:",
 				Help: "Script to run binary/source file against test cases\n" +
-					"For example, './a.out', 'java ${fileBasename}', 'python ${file}' etc\n" +
+					"For example, './a.out', 'java ${fileBase}', 'python ${file}' etc\n" +
 					"Field is required; Will be run once for each sample test case",
 			},
 			Validate: survey.Required,
@@ -159,7 +159,7 @@ func addTmplt() {
 				Message: "Post-script:",
 				Help: "Script to cleanup any residual binary files, etc\n" +
 					"Run (once) after testing of all sample tests has finished\n" +
-					"For example, 'rm a.out', 'del ${fileBasename}', etc\n" +
+					"For example, 'rm a.out', 'del ${fileBase}', etc\n" +
 					"Can be left blank, if cleanup is required/desired",
 			},
 		},
