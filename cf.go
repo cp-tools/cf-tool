@@ -3,6 +3,7 @@ package main
 import (
 	cmd "cf/cmd"
 	cfg "cf/config"
+	pkg "cf/packages"
 
 	"os"
 	"path/filepath"
@@ -14,11 +15,11 @@ const manPage = `
 Usage:
   cf config
   cf gen    [-A]
-  cf open   [<info>...]
-  cf fetch  [<info>...]
-  cf test   [[-i -e<e> -t<t>] | -C] [-f<f>]
-  cf submit [<info>... -f<f>]
-  cf watch  [<info>... -s<cnt>]
+  cf open   [<info>...] [--api]
+  cf fetch  [<info>...] [--api]
+  cf test   [[-i -e<e> -t<t>] | -C] [-f<f>] [--api]
+  cf submit [<info>... -f<f>] [--api]
+  cf watch  [<info>... -s<cnt>] [--api]
   cf pull   [<info>...] -H<handle>
   cf upgrade
 
@@ -31,6 +32,7 @@ Options:
   -s, --submissions <cnt>     watch status of last <cnt> submissions [default: 0] 
   -H, --handle <handle>       cf handle (not email) of reqd user  
   -C, --custom                run interactive session, with input from stdin
+      --api                   remove all escape sequences from output
   -h, --help                  show this screen
   -v, --version               show cli version
 `
@@ -53,6 +55,7 @@ func main() {
 	opt := cmd.Opts{}
 	args.Bind(&opt)
 	opt.FindContestData()
+	pkg.IsAPI(opt.API)
 
 	// run function based on subcommand
 	switch {
@@ -81,15 +84,16 @@ func main() {
 /*
 Global variables
   Generic:
-	- ${handle}				: username of currently logged in user session
-	- ${date}				: dd-mm-yy format of current date
-	- ${time}				: hh:mm:ss format of current time
+	- ${handle}             : username of currently logged in user session
+	- ${date}               : dd-mm-yy format of current date
+	- ${time}               : hh:mm:ss format of current time
 
 	Non-Generic:
-	- ${contest}			: The contest id parsed from args / folder path
-	- ${problem}			: The problem id parsed from args / folder path
-	- ${group}				: The group id parsed from folder path / url
-	- ${contClass}			: The class of the contest (contest / gym / group)
-	- ${idx}				: index of iteration (eg: c${idx} as name of gen file)
-	- ${file}				: file you wish to test / submit
+	- ${contest}            : The contest id parsed from args / folder path
+	- ${problem}            : The problem id parsed from args / folder path
+	- ${group}              : The group id parsed from folder path / url
+	- ${contClass}          : The class of the contest (contest / gym / group)
+	- ${idx}                : index of iteration (eg: c${idx} as name of gen file)
+	- ${file}               : file you wish to test / submit
+	- ${fileBase}           : file path (without extension) you wish to test / submit
 */

@@ -5,6 +5,7 @@ import (
 
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"reflect"
 	"strconv"
@@ -13,7 +14,7 @@ import (
 )
 
 // Version of the current executable
-const Version = "0.9.0"
+const Version = "1.0.0"
 
 type (
 	// Opts is struct docopt binds flag data to
@@ -38,12 +39,14 @@ type (
 		SubCnt int    `docopt:"--submissions"`
 		Handle string `docopt:"--handle"`
 		Custom bool   `docopt:"--custom"`
+		API    bool   `docopt:"--api"`
 
 		contest   string
 		problem   string
 		group     string
 		contClass string
 		dirPath   string
+		link      url.URL
 	}
 
 	// Env are global (generic and non-genric) variables
@@ -60,6 +63,7 @@ type (
 		ContClass string `env:"${contClass}"`
 		Idx       string `env:"${idx}"`
 		File      string `env:"${file}"`
+		FileBase  string `env:"${fileBase}"`
 	}
 )
 
@@ -67,40 +71,34 @@ type (
 // and also determines the class (contest / gym) from the contest id
 func (opt *Opts) FindContestData() {
 	// path to current directory
-	path, _ := os.Getwd()
+	currPath, _ := os.Getwd()
 
 	if len(opt.Info) == 0 {
 		// no contest id given in flags. Fetch from folder path
-		data := strings.Split(path, string(os.PathSeparator))
+		data := strings.Split(currPath, string(os.PathSeparator))
 		data = append(data, make([]string, 10)...)
 		sz := len(data) - 10
 
 		// cleans path to return dir path to root folder
 		clean := func(i int) string {
 			str := filepath.Join(data[i:]...)
-			return strings.TrimSuffix(path, str)
+			return strings.TrimSuffix(currPath, str)
 		}
 		// find last directory matching (contests/gym/group)
 		for i := sz - 1; i >= 0; i-- {
 			// path corresponds to contest directory
-			if data[i] == "contest" {
-				opt.contClass = "contest"
+			if data[i] == "contest" || data[i] == "gym" {
+				opt.contClass = data[i]
 				opt.contest = data[i+1]
 				opt.problem = data[i+2]
-				path = clean(i)
-				break
-			} else if data[i] == "gym" {
-				opt.contClass = "gym"
-				opt.contest = data[i+1]
-				opt.problem = data[i+2]
-				path = clean(i)
+				currPath = clean(i)
 				break
 			} else if data[i] == "group" {
-				opt.contClass = "group"
+				opt.contClass = data[i]
 				opt.group = data[i+1]
 				opt.contest = data[i+2]
 				opt.problem = data[i+3]
-				path = clean(i)
+				currPath = clean(i)
 				break
 			}
 		}
@@ -110,20 +108,16 @@ func (opt *Opts) FindContestData() {
 		// prevent out-of-bounds accessing
 		data = append(data, make([]string, 10)...)
 		sz := len(data) - 10
-		// iterate over each part of url
+		// iterate over each part of url and
+		// find first part matching criteria
 		for i := 0; i < sz; i++ {
-			if data[i] == "contest" {
-				opt.contClass = "contest"
-				opt.contest = data[i+1]
-				opt.problem = data[i+3]
-				break
-			} else if data[i] == "gym" {
-				opt.contClass = "gym"
+			if data[i] == "contest" || data[i] == "gym" {
+				opt.contClass = data[i]
 				opt.contest = data[i+1]
 				opt.problem = data[i+3]
 				break
 			} else if data[i] == "group" {
-				opt.contClass = "group"
+				opt.contClass = data[i]
 				opt.group = data[i+1]
 				opt.contest = data[i+3]
 				opt.problem = data[i+5]
@@ -131,14 +125,12 @@ func (opt *Opts) FindContestData() {
 			}
 		}
 	} else {
-		// parse from command line args (like v0.2.2)
+		// parse from command line args (for example, 1234 c2)
 		data := append(opt.Info, make([]string, 10)...)
 		if val, err := strconv.Atoi(data[0]); err == nil {
 			if val <= 100000 {
-				// check if contest
 				opt.contClass = "contest"
 			} else {
-				// type is gym
 				opt.contClass = "gym"
 			}
 			opt.contest = data[0]
@@ -154,7 +146,19 @@ func (opt *Opts) FindContestData() {
 	// convert problem id to lowercase
 	opt.problem = strings.ToLower(opt.problem)
 	// set path to folder containing contest
-	opt.dirPath = path
+	opt.dirPath = currPath
+	// set common link to contest
+	// dereference the url variable
+	link, _ := url.Parse(cfg.Settings.Host)
+	opt.link = *link
+	if opt.contClass == "contest" || opt.contClass == "gym" {
+		// not group, regular parsing
+		opt.link.Path = path.Join(opt.link.Path, opt.contClass, opt.contest)
+	} else if opt.contClass == "group" {
+		// append group value to link
+		opt.link.Path = path.Join(opt.link.Path, opt.contClass,
+			opt.group, "contest", opt.contest)
+	}
 	return
 }
 
@@ -174,6 +178,8 @@ func (e Env) ReplPlaceholder(text string) string {
 	if e.Idx == "0" {
 		e.Idx = ""
 	}
+	// extract file name from ${file} value
+	e.FileBase = strings.TrimSuffix(e.File, filepath.Ext(e.File))
 
 	// iterate over struct and replace variables
 	t := reflect.TypeOf(e)

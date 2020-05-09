@@ -10,7 +10,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/gosuri/uitable"
-	"github.com/k0kubun/go-ansi"
 )
 
 // RunWatch is called on running cf watch
@@ -21,20 +20,20 @@ func (opt Opts) RunWatch() {
 		return
 	}
 	// header formatting for table
-	headerfmt := color.New(color.FgBlue, color.Bold, color.Underline).SprintfFunc()
+	headerfmt := pkg.Blue.Add(color.Underline).SprintfFunc()
 
 	if opt.SubCnt == 0 {
 		// submissions aren't specified to be parsed
 		// parse contest solve status instead
 
 		// fetch contest solve status
-		data, err := cln.WatchContest(opt.group, opt.contest, opt.contClass)
+		data, err := cln.WatchContest(opt.group, opt.contest, opt.contClass, opt.link)
 		pkg.PrintError(err, "Failed to extract contest solve status")
 
 		// init table with header + color
 		tbl := uitable.New()
 		tbl.AddRow(headerfmt("#"), headerfmt("Name"),
-			headerfmt("Status"), headerfmt("Count"))
+			headerfmt("  "), headerfmt("Count"))
 		tbl.MaxColWidth = 40
 		tbl.Separator = " | "
 
@@ -54,39 +53,27 @@ func (opt Opts) RunWatch() {
 			clean := func(status string) string {
 				switch status {
 				case "accepted-problem":
-					return color.New(color.BgGreen).Sprint("      ")
+					return pkg.Green.Sprint("AC")
 				case "rejected-problem":
-					return color.New(color.BgRed).Sprint("      ")
+					return pkg.Red.Sprint("RE")
 				default:
-					return color.New(color.BgWhite).Sprint("      ")
+					return "NA"
 				}
 			}
 			// insert row to table
 			tbl.AddRow(prob.ID, prob.Name, clean(prob.Status), prob.Count)
 		}
 		fmt.Println(tbl)
+
 	} else {
 		// infinite loop till verdicts declared
-		for isFirst := true; true; isFirst = false {
+		pkg.LiveUI.Start()
+		for {
 			// timer to fetch data in interval of 1 second
 			start := time.Now()
 			// fetch contest submission status
-			data, err := cln.WatchSubmissions(opt.group, opt.contest, opt.contClass, opt.problem)
+			data, err := cln.WatchSubmissions(opt.group, opt.contest, opt.contClass, opt.problem, opt.link)
 			pkg.PrintError(err, "Failed to extract submissions in contest")
-
-			// min function (since there golang lacks min/max uggh)
-			min := func(a, b int) int {
-				if a <= b {
-					return a
-				}
-				return b
-			}
-			if isFirst == false {
-				for i := 0; i <= min(opt.SubCnt, len(data)); i++ {
-					ansi.CursorPreviousLine(1)
-					ansi.EraseInLine(2)
-				}
-			}
 
 			// create new table
 			tbl := uitable.New()
@@ -109,7 +96,7 @@ func (opt Opts) RunWatch() {
 					isPending = true
 				}
 			}
-			fmt.Println(tbl)
+			pkg.LiveUI.Print(tbl.String())
 
 			if isPending == false {
 				break

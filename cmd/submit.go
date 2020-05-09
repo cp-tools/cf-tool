@@ -5,11 +5,9 @@ import (
 	cfg "cf/config"
 	pkg "cf/packages"
 
-	"fmt"
 	"time"
 
 	"github.com/gosuri/uitable"
-	"github.com/k0kubun/go-ansi"
 )
 
 // RunSubmit is called on running cf submit
@@ -57,29 +55,25 @@ func (opt Opts) RunSubmit() {
 	}
 
 	// main submit code runs here
-	err = cln.Submit(opt.group, opt.contest, opt.contClass, opt.problem, t.LangID, file)
+	err = cln.Submit(opt.group, opt.contest, opt.contClass, opt.problem, t.LangID, file, opt.link)
 	pkg.PrintError(err, "Failed to submit source code")
 	pkg.Log.Success("Submitted")
 	// watch submission verdict
-	watch(opt.group, opt.contest, opt.contClass, opt.problem)
+	opt.watch()
 
 	return
 }
 
-func watch(group, contest, contClass, problem string) {
+func (opt Opts) watch() {
 	// infinite loop till verdicts declared
-	for isFirst := true; true; isFirst = false {
+	pkg.LiveUI.Start()
+	for {
 		// fetch submission from contest every second
 		start := time.Now()
 
-		data, err := cln.WatchSubmissions(group, contest, contClass, problem)
+		data, err := cln.WatchSubmissions(opt.group, opt.contest, opt.contClass, opt.problem, opt.link)
 		pkg.PrintError(err, "Failed to extract submissions in contest.")
 		sub := data[0]
-
-		if isFirst == false {
-			ansi.CursorPreviousLine(1)
-			ansi.EraseInLine(2)
-		}
 
 		tbl := uitable.New()
 		tbl.Separator = " "
@@ -88,10 +82,10 @@ func watch(group, contest, contClass, problem string) {
 		if sub.Waiting == "false" {
 			tbl.AddRow("Memory:", sub.Memory)
 			tbl.AddRow("Time:", sub.Time)
-			fmt.Println(tbl)
+			pkg.LiveUI.Print(tbl.String())
 			break
 		}
-		fmt.Println(tbl)
+		pkg.LiveUI.Print(tbl.String())
 		// sleep for 1 second
 		time.Sleep(time.Second - time.Since(start))
 	}

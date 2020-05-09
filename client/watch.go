@@ -5,14 +5,12 @@ import (
 	pkg "cf/packages"
 
 	"bytes"
-	"errors"
-	"net/http"
+	"fmt"
 	"net/url"
 	"path"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/fatih/color"
 )
 
 type (
@@ -33,24 +31,18 @@ type (
 // WatchSubmissions finds all submissions in contID that matches query string
 // query = problem to fetch all submissions in a particular problem (should be uppercase)
 // query = submitID to fetch submission of given submission id
-func WatchSubmissions(group, contest, contClass, query string) ([]Submission, error) {
+func WatchSubmissions(group, contest, contClass, query string, link url.URL) ([]Submission, error) {
 	// This implementation contains redirection prevention
-	// To determine if contest exists or not
 	c := cfg.Session.Client
-	c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		return errors.New(contClass + " " + contest + " doesn't exist!")
-	}
-	link, _ := url.Parse(cfg.Settings.Host)
-	if group == "" {
-		// not group. Regular parsing
-		link.Path = path.Join(link.Path, contClass, contest, "my")
-	} else {
-		// append group value to link
-		link.Path = path.Join(link.Path, "group", group, "contest", contest, "my")
-	}
+	c.CheckRedirect = pkg.RedirectCheck
 	// fetch all submissions in contest
-	body, err := pkg.GetReqBody(c, link.String())
+	link.Path = path.Join(link.Path, "my")
+	body, err := pkg.GetReqBody(&c, link.String())
 	if err != nil {
+		return nil, err
+	} else if len(body) == 0 {
+		// such page doesn't exist
+		err = fmt.Errorf("%v %v doesn't exist", contClass, contest)
 		return nil, err
 	}
 	// to hold all submissions
@@ -60,12 +52,6 @@ func WatchSubmissions(group, contest, contClass, query string) ([]Submission, er
 	sel := doc.Find("tr[data-submission-id]").Has(`a[href*="/` + strings.ToUpper(query) + `"]`)
 	sel.Each(func(_ int, row *goquery.Selection) {
 
-		getText := func(query string) string {
-			return strings.TrimSpace(row.Find(query).Text())
-		}
-		getAttr := func(query, attr string) string {
-			return strings.TrimSpace(row.Find(query).AttrOr(attr, ""))
-		}
 		// compress verdict and return color coded string
 		clean := func(verdict string) string {
 			verdict = strings.ReplaceAll(verdict, "Wrong answer", "WA")
@@ -74,28 +60,27 @@ func WatchSubmissions(group, contest, contClass, query string) ([]Submission, er
 
 			switch {
 			case strings.HasPrefix(verdict, "TLE"):
-				return color.YellowString(verdict)
+				return pkg.Yellow.Sprint(verdict)
 			case strings.HasPrefix(verdict, "MLE"):
-				return color.RedString(verdict)
+				return pkg.Red.Sprint(verdict)
 			case strings.HasPrefix(verdict, "WA"):
-				return color.RedString(verdict)
+				return pkg.Red.Sprint(verdict)
 			case strings.HasPrefix(verdict, "Accepted"):
-				return color.GreenString(verdict)
+				return pkg.Green.Sprint(verdict)
 			default:
 				return verdict
 			}
 		}
 
-		when := strings.TrimSpace(row.Find("td").First().Next().Text())
 		data = append(data, Submission{
-			ID:      getText(".id-cell"),
-			When:    when,
-			Name:    getText("td[data-problemId]"),
-			Lang:    getText("td:not([class])"),
-			Waiting: getAttr(".status-cell", "waiting"),
-			Verdict: clean(getText(".status-verdict-cell")),
-			Time:    getText(".time-consumed-cell"),
-			Memory:  getText(".memory-consumed-cell"),
+			ID:      pkg.GetText(row, ".id-cell"),
+			When:    pkg.GetText(row.Find("td").First().Next(), "*"),
+			Name:    pkg.GetText(row, "td[data-problemId]"),
+			Lang:    pkg.GetText(row, "td:not([class])"),
+			Waiting: pkg.GetAttr(row, ".status-cell", "waiting"),
+			Verdict: clean(pkg.GetText(row, ".status-verdict-cell")),
+			Time:    pkg.GetText(row, ".time-consumed-cell"),
+			Memory:  pkg.GetText(row, ".memory-consumed-cell"),
 		})
 	})
 
@@ -103,24 +88,17 @@ func WatchSubmissions(group, contest, contClass, query string) ([]Submission, er
 }
 
 // WatchContest parses contest solved count status
-func WatchContest(group, contest, contClass string) ([]Problem, error) {
+func WatchContest(group, contest, contClass string, link url.URL) ([]Problem, error) {
 	// This implementation contains redirection prevention
-	// To determine if contest exists or not
 	c := cfg.Session.Client
-	c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		return errors.New(contClass + " " + contest + " doesn't exist!")
-	}
-	link, _ := url.Parse(cfg.Settings.Host)
-	if group == "" {
-		// not group. Regular parsing
-		link.Path = path.Join(link.Path, contClass, contest)
-	} else {
-		// append group value to link
-		link.Path = path.Join(link.Path, "group", group, "contest", contest)
-	}
+	c.CheckRedirect = pkg.RedirectCheck
 	// fetch contest dashboard page
-	body, err := pkg.GetReqBody(c, link.String())
+	body, err := pkg.GetReqBody(&c, link.String())
 	if err != nil {
+		return nil, err
+	} else if len(body) == 0 {
+		// such page doesn't exist
+		err = fmt.Errorf("%v %v doesn't exist", contClass, contest)
 		return nil, err
 	}
 	// to hold all problems in contest
@@ -129,15 +107,11 @@ func WatchContest(group, contest, contClass string) ([]Problem, error) {
 	doc, _ := goquery.NewDocumentFromReader(bytes.NewReader(body))
 	doc.Find(".problems tr").Has("td").Each(func(_ int, row *goquery.Selection) {
 
-		getText := func(query string) string {
-			return strings.TrimSpace(row.Find(query).Text())
-		}
-
 		data = append(data, Problem{
-			ID:     getText(".id"),
-			Name:   getText("td > div > div > a"),
+			ID:     pkg.GetText(row, ".id"),
+			Name:   pkg.GetText(row, "td > div > div > a"),
 			Status: row.AttrOr("class", ""),
-			Count:  getText("td > a"),
+			Count:  pkg.GetText(row, "td > a"),
 		})
 	})
 	return data, nil

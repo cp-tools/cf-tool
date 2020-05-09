@@ -19,7 +19,7 @@ func (opt Opts) RunFetch() {
 	}
 	// fetch countdown info
 	pkg.Log.Info("Fetching details of " + opt.contClass + " " + opt.contest)
-	dur, err := cln.FindCountdown(opt.group, opt.contest, opt.contClass)
+	dur, err := cln.FindCountdown(opt.group, opt.contest, opt.contClass, opt.link)
 	pkg.PrintError(err, "Extraction of countdown failed")
 
 	// contest not yet started
@@ -34,12 +34,40 @@ func (opt Opts) RunFetch() {
 	}
 	// Fetch ALL problems from contest page
 	pkg.Log.Info("Fetching problems...")
-	probs, err := cln.FetchProbs(opt.group, opt.contest, opt.contClass)
+	probs, err := cln.FetchProbs(opt.group, opt.contest, opt.contClass, opt.link)
 	pkg.PrintError(err, "Extraction of contest problems failed")
 
 	// Fetch all tests from problems page
-	splInp, splOut, err := cln.FetchTests(opt.group, opt.contest, opt.contClass)
-	pkg.PrintError(err, "Failed to extract sample tests.")
+	splInp, splOut, err := cln.FetchTests(opt.group, opt.contest, opt.contClass, "", opt.link)
+	pkg.PrintError(err, "Failed to extract sample tests")
+	// no sample tests found, try parsing from each problem
+	if len(splInp) == 0 {
+		pkg.Log.Warning("Failed to fetch tests from problems page")
+		pkg.Log.Info("Fetching from page of every problem")
+		pkg.Log.Notice("Please be patient")
+		// iterate over all present problems
+		for _, prob := range probs {
+			// Problem isn't specified to be fetched
+			if opt.problem != "" && prob != opt.problem {
+				// enter blank tests (as they aren't required)
+				splInp = append(splInp, make([]string, 0))
+				splOut = append(splOut, make([]string, 0))
+				continue
+			}
+			probInp, probOut, err := cln.FetchTests(opt.group,
+				opt.contest, opt.contClass, prob, opt.link)
+			pkg.PrintError(err, "Failed to extract sample tests of "+prob)
+			// append sample tests to slice
+			splInp = append(splInp, probInp...)
+			splOut = append(splOut, probOut...)
+			// if problem is pdf format (can't extract tests)
+			if len(probInp) == 0 {
+				pkg.Log.Warning("Unable to extract test(s) - " + prob)
+				splInp = append(splInp, make([]string, 0))
+				splOut = append(splOut, make([]string, 0))
+			}
+		}
+	}
 
 	// iterate over fetched problems tests
 	for i, prob := range probs {

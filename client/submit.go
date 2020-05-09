@@ -6,6 +6,7 @@ import (
 
 	"bytes"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/url"
 	"path"
@@ -14,20 +15,17 @@ import (
 )
 
 // Submit uploads form data and submits user code
-func Submit(group, contest, contClass, problem, langID, file string) error {
-	// Redirection prevention is not applicable here
-	// since successful submission causes auto redirect
+func Submit(group, contest, contClass, problem, langID, file string, link url.URL) error {
+
 	c := cfg.Session.Client
-	link, _ := url.Parse(cfg.Settings.Host)
-	if group == "" {
-		// not group. Regular parsing
-		link.Path = path.Join(link.Path, contClass, contest, "submit")
-	} else {
-		// append group value to link
-		link.Path = path.Join(link.Path, "group", group, "contest", contest, "submit")
-	}
-	body, err := pkg.GetReqBody(c, link.String())
+	c.CheckRedirect = pkg.RedirectCheck
+	link.Path = path.Join(link.Path, "submit")
+	body, err := pkg.GetReqBody(&c, link.String())
 	if err != nil {
+		return err
+	} else if len(body) == 0 {
+		// such page doesn't exist
+		err = fmt.Errorf("%v %v%v doesn't exist", contClass, contest, problem)
 		return err
 	}
 
@@ -37,8 +35,9 @@ func Submit(group, contest, contClass, problem, langID, file string) error {
 	csrf := pkg.FindCsrf(body)
 	ftaa := "yzo0kk4bhlbaw83g2q"
 	bfaa := "883b704dbe5c70e1e61de4d8aff2da32"
-	// post form data
-	body, err = pkg.PostReqBody(c, link.String(), url.Values{
+	// post form data (remove redirection prevention)
+	c.CheckRedirect = nil
+	body, err = pkg.PostReqBody(&c, link.String(), url.Values{
 		"csrf_token":            {csrf},
 		"ftaa":                  {ftaa},
 		"bfaa":                  {bfaa},

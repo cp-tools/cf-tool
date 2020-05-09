@@ -8,8 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/fatih/color"
 )
 
 // RunTest is called on running `cf test`
@@ -78,20 +76,20 @@ func (opt Opts) tradJudge(t cfg.Template, e Env) {
 		switch {
 		case elapsed.Seconds() >= float64(opt.Tl):
 			// print TLE message (add support for custom time limit)
-			color.Yellow("#%d: TLE .... %v\n", i, elapsed.String())
+			pkg.Yellow.Printf("#%d: TLE .... %v\n", i, elapsed.String())
 
 		case err != nil:
 			// print RTE message with error data
-			color.Red("#%d: RTE .... %v\n", i, err.Error())
+			pkg.Red.Printf("#%d: RTE .... %v\n", i, err.Error())
 
 		case stdout != out[i]:
 			// print WA message and diff output
-			color.Red("#%d: WA .... %v\n", i, elapsed.String())
+			pkg.Red.Printf("#%d: WA .... %v\n", i, elapsed.String())
 			cln.PrintDiff(inp[i], stdout, out[i])
 
 		default:
 			// print AC message
-			color.Green("#%d: AC .... %v\n", i, elapsed.String())
+			pkg.Green.Printf("#%d: AC .... %v\n", i, elapsed.String())
 		}
 	}
 	return

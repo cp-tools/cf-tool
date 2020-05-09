@@ -5,37 +5,27 @@ import (
 	pkg "cf/packages"
 
 	"bytes"
-	"errors"
 	"fmt"
-	"net/http"
 	"net/url"
 	"path"
 	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/k0kubun/go-ansi"
 )
 
 // FindCountdown parses countdown (if exists) from countdown page
-func FindCountdown(group, contest, contClass string) (int64, error) {
+func FindCountdown(group, contest, contClass string, link url.URL) (int64, error) {
 	// This implementation contains redirection prevention
-	// To determine if contest exists or not
 	c := cfg.Session.Client
-	c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		return errors.New(contClass + " " + contest + " doesn't exist!")
-	}
-	link, _ := url.Parse(cfg.Settings.Host)
-	if group == "" {
-		// not group. Regular parsing
-		link.Path = path.Join(link.Path, contClass, contest, "countdown")
-	} else {
-		// append group value to link
-		link.Path = path.Join(link.Path, "group", group, "contest", contest, "countdown")
-	}
-
-	body, err := pkg.GetReqBody(c, link.String())
+	c.CheckRedirect = pkg.RedirectCheck
+	link.Path = path.Join(link.Path, "countdown")
+	body, err := pkg.GetReqBody(&c, link.String())
 	if err != nil {
+		return 0, err
+	} else if len(body) == 0 {
+		// such page doesn't exist
+		err = fmt.Errorf("%v %v doesn't exist", contClass, contest)
 		return 0, err
 	}
 
@@ -50,33 +40,22 @@ func FindCountdown(group, contest, contClass string) (int64, error) {
 // StartCountdown starts countdown of dur seconds
 func StartCountdown(dur int64) {
 	// run timer till it runs out
-	for dur > 0 {
-		h := fmt.Sprintf("%d:", dur/(60*60))
-		m := fmt.Sprintf("0%d:", (dur/60)%60)
-		s := fmt.Sprintf("0%d", dur%60)
-		fmt.Println(h + m[len(m)-3:] + s[len(s)-2:])
-
+	pkg.LiveUI.Start()
+	ct := time.Now()
+	for ; dur > 0; dur-- {
+		t := ct.Add(time.Duration(dur) * time.Second)
+		pkg.LiveUI.Print(t.Format("15:04:05"))
 		time.Sleep(time.Second)
-		ansi.CursorPreviousLine(1)
-		dur--
 	}
+	// remove timer data from screen
 	return
 }
 
 // FetchProbs finds all problems present in the contest
-func FetchProbs(group, contest, contClass string) ([]string, error) {
-
+func FetchProbs(group, contest, contClass string, link url.URL) ([]string, error) {
+	// no need of modifying link as it already points to dashboard
 	c := cfg.Session.Client
-
-	link, _ := url.Parse(cfg.Settings.Host)
-	if group == "" {
-		// not group. Regular parsing
-		link.Path = path.Join(link.Path, contClass, contest)
-	} else {
-		// append group value to link
-		link.Path = path.Join(link.Path, "group", group, "contest", contest)
-	}
-	body, err := pkg.GetReqBody(c, link.String())
+	body, err := pkg.GetReqBody(&c, link.String())
 	if err != nil {
 		return nil, err
 	}
@@ -90,21 +69,23 @@ func FetchProbs(group, contest, contClass string) ([]string, error) {
 	return probs, nil
 }
 
-// FetchTests extracts test cases of the all problems in contest
+// FetchTests extracts test cases of the problem(s) in contest
 // Returns 2d slice mapping to input and output
-func FetchTests(group, contest, contClass string) ([][]string, [][]string, error) {
+// If problem == "", fetch all problem test cases
+// else, only fetch of given problem.
+// fix for https://github.com/infixint943/cf/pull/2#issuecomment-626122011
+func FetchTests(group, contest, contClass, problem string, link url.URL) ([][]string, [][]string, error) {
 
 	c := cfg.Session.Client
-
-	link, _ := url.Parse(cfg.Settings.Host)
-	if group == "" {
-		// not group. Regular parsing
-		link.Path = path.Join(link.Path, contClass, contest, "problems")
+	if problem == "" {
+		// fetch from problems page
+		link.Path = path.Join(link.Path, "problems")
 	} else {
-		// append group value to link
-		link.Path = path.Join(link.Path, "group", group, "contest", contest, "problems")
+		// fetch from individual problem page
+		link.Path = path.Join(link.Path, "problem", problem)
 	}
-	body, err := pkg.GetReqBody(c, link.String())
+
+	body, err := pkg.GetReqBody(&c, link.String())
 	if err != nil {
 		return nil, nil, err
 	}

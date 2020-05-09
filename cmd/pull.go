@@ -30,13 +30,9 @@ func (opt Opts) RunPull() {
 			pkg.Log.Error("Failed to pull source code:" + sub.Sid)
 			continue
 		}
-		// determine contest type (groups not supported)
-		contClass := "contest"
-		if val, _ := strconv.Atoi(sub.Contest); val > 100000 {
-			contClass = "gym"
-		}
+
 		// create problem folder
-		path := filepath.Join(opt.dirPath, contClass, sub.Contest, sub.Problem)
+		path := filepath.Join(opt.dirPath, opt.contClass, sub.Contest, sub.Problem)
 		os.MkdirAll(path, os.ModePerm)
 
 		fName := fmt.Sprintf("${problem}${idx}%v", cln.LangExt[sub.Lang])
