@@ -74,11 +74,6 @@ func FetchProbs(group, contest, contClass string, link url.URL) ([]string, error
 // If problem == "", fetch all problem test cases
 // else, only fetch of given problem.
 // fix for https://github.com/infixint943/cf/pull/2#issuecomment-626122011
-/*
-	@todo Add fallback to parsing from individual problems
-	@body if problems page can't be loaded, add ability to parse
-	@body tests from individual problems.
-*/
 func FetchTests(group, contest, contClass, problem string, link url.URL) ([][]string, [][]string, error) {
 
 	c := cfg.Session.Client
