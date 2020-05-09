@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/k0kubun/go-ansi"
 )
 
 // FindCountdown parses countdown (if exists) from countdown page
@@ -50,14 +49,14 @@ func FindCountdown(group, contest, contClass string) (int64, error) {
 // StartCountdown starts countdown of dur seconds
 func StartCountdown(dur int64) {
 	// run timer till it runs out
+	pkg.LiveUI.Start()
 	for dur > 0 {
 		h := fmt.Sprintf("%d:", dur/(60*60))
 		m := fmt.Sprintf("0%d:", (dur/60)%60)
 		s := fmt.Sprintf("0%d", dur%60)
-		fmt.Println(h + m[len(m)-3:] + s[len(s)-2:])
+		pkg.LiveUI.Print(h + m[len(m)-3:] + s[len(s)-2:])
 
 		time.Sleep(time.Second)
-		ansi.CursorPreviousLine(1)
 		dur--
 	}
 	return

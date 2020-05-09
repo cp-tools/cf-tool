@@ -7,6 +7,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/fatih/color"
+	"github.com/k0kubun/go-ansi"
 )
 
 // Log is struct holding functions to print colored to stderr
@@ -22,14 +23,36 @@ var (
 		Success, Notice, Info, Error,
 		Warning func(text ...interface{})
 	}
+
+	LiveUI struct {
+		count int
+		isAPI bool
+		Start func()
+		Print func(text string)
+	}
 )
 
 func init() {
+	// Initialise colored text output
 	Log.Success = func(text ...interface{}) { Green.Fprintln(writer, text...) }
 	Log.Notice = func(text ...interface{}) { fmt.Fprintln(writer, text...) }
 	Log.Info = func(text ...interface{}) { Blue.Fprintln(writer, text...) }
 	Log.Error = func(text ...interface{}) { Red.Fprintln(writer, text...) }
 	Log.Warning = func(text ...interface{}) { Yellow.Fprintln(writer, text...) }
+
+	// Initialise Live rendering output
+	LiveUI.isAPI = false
+	LiveUI.Start = func() { LiveUI.count = 0 }
+	LiveUI.Print = func(text string) {
+		// clear last count lines from terminal
+		for i := 0; !LiveUI.isAPI && i < LiveUI.count; i++ {
+			ansi.CursorPreviousLine(1)
+			ansi.EraseInLine(2)
+		}
+		// count number of lines in text
+		LiveUI.count = strings.Count(text, "\n") + 1
+		fmt.Println(text)
+	}
 }
 
 // PrintError outputs error (with custom message)
