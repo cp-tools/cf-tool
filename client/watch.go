@@ -32,22 +32,15 @@ type (
 // WatchSubmissions finds all submissions in contID that matches query string
 // query = problem to fetch all submissions in a particular problem (should be uppercase)
 // query = submitID to fetch submission of given submission id
-func WatchSubmissions(group, contest, contClass, query string) ([]Submission, error) {
+func WatchSubmissions(group, contest, contClass, query string, link url.URL) ([]Submission, error) {
 	// This implementation contains redirection prevention
 	// To determine if contest exists or not
 	c := cfg.Session.Client
 	c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return errors.New(contClass + " " + contest + " doesn't exist!")
 	}
-	link, _ := url.Parse(cfg.Settings.Host)
-	if group == "" {
-		// not group. Regular parsing
-		link.Path = path.Join(link.Path, contClass, contest, "my")
-	} else {
-		// append group value to link
-		link.Path = path.Join(link.Path, "group", group, "contest", contest, "my")
-	}
 	// fetch all submissions in contest
+	link.Path = path.Join(link.Path, "my")
 	body, err := pkg.GetReqBody(c, link.String())
 	if err != nil {
 		return nil, err
@@ -95,21 +88,14 @@ func WatchSubmissions(group, contest, contClass, query string) ([]Submission, er
 }
 
 // WatchContest parses contest solved count status
-func WatchContest(group, contest, contClass string) ([]Problem, error) {
+func WatchContest(group, contest, contClass string, link url.URL) ([]Problem, error) {
 	// This implementation contains redirection prevention
 	// To determine if contest exists or not
 	c := cfg.Session.Client
 	c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return errors.New(contClass + " " + contest + " doesn't exist!")
 	}
-	link, _ := url.Parse(cfg.Settings.Host)
-	if group == "" {
-		// not group. Regular parsing
-		link.Path = path.Join(link.Path, contClass, contest)
-	} else {
-		// append group value to link
-		link.Path = path.Join(link.Path, "group", group, "contest", contest)
-	}
+	// link isn't modified since it points to contest dashboard
 	// fetch contest dashboard page
 	body, err := pkg.GetReqBody(c, link.String())
 	if err != nil {

@@ -57,16 +57,16 @@ func (opt Opts) RunSubmit() {
 	}
 
 	// main submit code runs here
-	err = cln.Submit(opt.group, opt.contest, opt.contClass, opt.problem, t.LangID, file)
+	err = cln.Submit(opt.group, opt.contest, opt.contClass, opt.problem, t.LangID, file, opt.link)
 	pkg.PrintError(err, "Failed to submit source code")
 	pkg.Log.Success("Submitted")
 	// watch submission verdict
-	watch(opt.group, opt.contest, opt.contClass, opt.problem)
+	opt.watch()
 
 	return
 }
 
-func watch(group, contest, contClass, problem string) {
+func (opt Opts) watch() {
 	// infinite loop till verdicts declared
 	uiWriter := uilive.New()
 	uiWriter.Start()
@@ -74,7 +74,7 @@ func watch(group, contest, contClass, problem string) {
 		// fetch submission from contest every second
 		start := time.Now()
 
-		data, err := cln.WatchSubmissions(group, contest, contClass, problem)
+		data, err := cln.WatchSubmissions(opt.group, opt.contest, opt.contClass, opt.problem, opt.link)
 		pkg.PrintError(err, "Failed to extract submissions in contest.")
 		sub := data[0]
 

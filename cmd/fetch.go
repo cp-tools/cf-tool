@@ -19,7 +19,7 @@ func (opt Opts) RunFetch() {
 	}
 	// fetch countdown info
 	pkg.Log.Info("Fetching details of " + opt.contClass + " " + opt.contest)
-	dur, err := cln.FindCountdown(opt.group, opt.contest, opt.contClass)
+	dur, err := cln.FindCountdown(opt.group, opt.contest, opt.contClass, opt.link)
 	pkg.PrintError(err, "Extraction of countdown failed")
 
 	// contest not yet started
@@ -34,11 +34,11 @@ func (opt Opts) RunFetch() {
 	}
 	// Fetch ALL problems from contest page
 	pkg.Log.Info("Fetching problems...")
-	probs, err := cln.FetchProbs(opt.group, opt.contest, opt.contClass)
+	probs, err := cln.FetchProbs(opt.group, opt.contest, opt.contClass, opt.link)
 	pkg.PrintError(err, "Extraction of contest problems failed")
 
 	// Fetch all tests from problems page
-	splInp, splOut, err := cln.FetchTests(opt.group, opt.contest, opt.contClass)
+	splInp, splOut, err := cln.FetchTests(opt.group, opt.contest, opt.contClass, opt.link)
 	pkg.PrintError(err, "Failed to extract sample tests.")
 
 	// iterate over fetched problems tests

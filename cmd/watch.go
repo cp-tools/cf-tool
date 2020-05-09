@@ -28,7 +28,7 @@ func (opt Opts) RunWatch() {
 		// parse contest solve status instead
 
 		// fetch contest solve status
-		data, err := cln.WatchContest(opt.group, opt.contest, opt.contClass)
+		data, err := cln.WatchContest(opt.group, opt.contest, opt.contClass, opt.link)
 		pkg.PrintError(err, "Failed to extract contest solve status")
 
 		// init table with header + color
@@ -64,9 +64,7 @@ func (opt Opts) RunWatch() {
 			// insert row to table
 			tbl.AddRow(prob.ID, prob.Name, clean(prob.Status), prob.Count)
 		}
-		fmt.Println()
 		fmt.Println(tbl)
-		fmt.Println()
 
 	} else {
 		// infinite loop till verdicts declared
@@ -76,7 +74,7 @@ func (opt Opts) RunWatch() {
 			// timer to fetch data in interval of 1 second
 			start := time.Now()
 			// fetch contest submission status
-			data, err := cln.WatchSubmissions(opt.group, opt.contest, opt.contClass, opt.problem)
+			data, err := cln.WatchSubmissions(opt.group, opt.contest, opt.contClass, opt.problem, opt.link)
 			pkg.PrintError(err, "Failed to extract submissions in contest")
 
 			// create new table
@@ -100,7 +98,6 @@ func (opt Opts) RunWatch() {
 					isPending = true
 				}
 			}
-			fmt.Println()
 			fmt.Fprintln(uiWriter, tbl)
 			fmt.Println()
 

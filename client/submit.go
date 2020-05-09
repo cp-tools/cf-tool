@@ -14,18 +14,11 @@ import (
 )
 
 // Submit uploads form data and submits user code
-func Submit(group, contest, contClass, problem, langID, file string) error {
+func Submit(group, contest, contClass, problem, langID, file string, link url.URL) error {
 	// Redirection prevention is not applicable here
 	// since successful submission causes auto redirect
 	c := cfg.Session.Client
-	link, _ := url.Parse(cfg.Settings.Host)
-	if group == "" {
-		// not group. Regular parsing
-		link.Path = path.Join(link.Path, contClass, contest, "submit")
-	} else {
-		// append group value to link
-		link.Path = path.Join(link.Path, "group", group, "contest", contest, "submit")
-	}
+	link.Path = path.Join(link.Path, "submit")
 	body, err := pkg.GetReqBody(c, link.String())
 	if err != nil {
 		return err

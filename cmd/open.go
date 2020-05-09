@@ -1,10 +1,8 @@
 package cmd
 
 import (
-	cfg "cf/config"
 	pkg "cf/packages"
 
-	"net/url"
 	"os/exec"
 	"path"
 	"runtime"
@@ -17,14 +15,7 @@ func (opt Opts) RunOpen() {
 		pkg.Log.Error("No contest id found")
 		return
 	}
-	link, _ := url.Parse(cfg.Settings.Host)
-	if opt.group == "" {
-		// not group. Regular parsing
-		link.Path = path.Join(link.Path, opt.contClass, opt.contest)
-	} else {
-		// append group value to link
-		link.Path = path.Join(link.Path, "group", opt.group, "contest", opt.contest)
-	}
+	link := opt.link
 	// open problems page (all problems)
 	if opt.problem == "" {
 		link.Path = path.Join(link.Path, "problems")

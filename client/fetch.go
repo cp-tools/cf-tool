@@ -18,22 +18,14 @@ import (
 )
 
 // FindCountdown parses countdown (if exists) from countdown page
-func FindCountdown(group, contest, contClass string) (int64, error) {
+func FindCountdown(group, contest, contClass string, link url.URL) (int64, error) {
 	// This implementation contains redirection prevention
 	// To determine if contest exists or not
 	c := cfg.Session.Client
 	c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return errors.New(contClass + " " + contest + " doesn't exist!")
 	}
-	link, _ := url.Parse(cfg.Settings.Host)
-	if group == "" {
-		// not group. Regular parsing
-		link.Path = path.Join(link.Path, contClass, contest, "countdown")
-	} else {
-		// append group value to link
-		link.Path = path.Join(link.Path, "group", group, "contest", contest, "countdown")
-	}
-
+	link.Path = path.Join(link.Path, "countdown")
 	body, err := pkg.GetReqBody(c, link.String())
 	if err != nil {
 		return 0, err
@@ -65,18 +57,9 @@ func StartCountdown(dur int64) {
 }
 
 // FetchProbs finds all problems present in the contest
-func FetchProbs(group, contest, contClass string) ([]string, error) {
-
+func FetchProbs(group, contest, contClass string, link url.URL) ([]string, error) {
+	// no need of modifying link as it already points to dashboard
 	c := cfg.Session.Client
-
-	link, _ := url.Parse(cfg.Settings.Host)
-	if group == "" {
-		// not group. Regular parsing
-		link.Path = path.Join(link.Path, contClass, contest)
-	} else {
-		// append group value to link
-		link.Path = path.Join(link.Path, "group", group, "contest", contest)
-	}
 	body, err := pkg.GetReqBody(c, link.String())
 	if err != nil {
 		return nil, err
@@ -93,18 +76,15 @@ func FetchProbs(group, contest, contClass string) ([]string, error) {
 
 // FetchTests extracts test cases of the all problems in contest
 // Returns 2d slice mapping to input and output
-func FetchTests(group, contest, contClass string) ([][]string, [][]string, error) {
+/*
+	@todo Add fallback to parsing from individual problems
+	@body if problems page can't be loaded, add ability to parse
+	@body tests from individual problems.
+*/
+func FetchTests(group, contest, contClass string, link url.URL) ([][]string, [][]string, error) {
 
 	c := cfg.Session.Client
-
-	link, _ := url.Parse(cfg.Settings.Host)
-	if group == "" {
-		// not group. Regular parsing
-		link.Path = path.Join(link.Path, contClass, contest, "problems")
-	} else {
-		// append group value to link
-		link.Path = path.Join(link.Path, "group", group, "contest", contest, "problems")
-	}
+	link.Path = path.Join(link.Path, "problems")
 	body, err := pkg.GetReqBody(c, link.String())
 	if err != nil {
 		return nil, nil, err
