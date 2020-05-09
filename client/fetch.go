@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/gosuri/uilive"
 )
 
 // FindCountdown parses countdown (if exists) from countdown page
@@ -42,17 +41,14 @@ func FindCountdown(group, contest, contClass string, link url.URL) (int64, error
 // StartCountdown starts countdown of dur seconds
 func StartCountdown(dur int64) {
 	// run timer till it runs out
-	uiWriter := uilive.New()
-	uiWriter.Start()
+	pkg.LiveUI.Start()
 	ct := time.Now()
 	for ; dur > 0; dur-- {
 		t := ct.Add(time.Duration(dur) * time.Second)
-		fmt.Fprintln(uiWriter, t.Format("15:04:05"))
+		pkg.LiveUI.Print(t.Format("15:04:05"))
 		time.Sleep(time.Second)
 	}
 	// remove timer data from screen
-	fmt.Fprint(uiWriter)
-	uiWriter.Stop()
 	return
 }
 

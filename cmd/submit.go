@@ -5,10 +5,8 @@ import (
 	cfg "cf/config"
 	pkg "cf/packages"
 
-	"fmt"
 	"time"
 
-	"github.com/gosuri/uilive"
 	"github.com/gosuri/uitable"
 )
 
@@ -68,8 +66,7 @@ func (opt Opts) RunSubmit() {
 
 func (opt Opts) watch() {
 	// infinite loop till verdicts declared
-	uiWriter := uilive.New()
-	uiWriter.Start()
+	pkg.LiveUI.Start()
 	for {
 		// fetch submission from contest every second
 		start := time.Now()
@@ -85,13 +82,12 @@ func (opt Opts) watch() {
 		if sub.Waiting == "false" {
 			tbl.AddRow("Memory:", sub.Memory)
 			tbl.AddRow("Time:", sub.Time)
-			fmt.Fprintln(uiWriter, tbl)
+			pkg.LiveUI.Print(tbl.String())
 			break
 		}
-		fmt.Fprintln(uiWriter, tbl)
+		pkg.LiveUI.Print(tbl.String())
 		// sleep for 1 second
 		time.Sleep(time.Second - time.Since(start))
 	}
-	uiWriter.Stop()
 	return
 }

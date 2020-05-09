@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/gosuri/uilive"
 	"github.com/gosuri/uitable"
 )
 
@@ -68,8 +67,7 @@ func (opt Opts) RunWatch() {
 
 	} else {
 		// infinite loop till verdicts declared
-		uiWriter := uilive.New()
-		uiWriter.Start()
+		pkg.LiveUI.Start()
 		for {
 			// timer to fetch data in interval of 1 second
 			start := time.Now()
@@ -98,8 +96,7 @@ func (opt Opts) RunWatch() {
 					isPending = true
 				}
 			}
-			fmt.Fprintln(uiWriter, tbl)
-			fmt.Println()
+			pkg.LiveUI.Print(tbl.String())
 
 			if isPending == false {
 				break
@@ -107,7 +104,6 @@ func (opt Opts) RunWatch() {
 
 			time.Sleep(time.Second - time.Since(start))
 		}
-		uiWriter.Stop()
 	}
 	return
 }
