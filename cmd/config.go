@@ -72,8 +72,8 @@ func login() {
 		pkg.Log.Notice("Welcome " + cfg.Session.Handle)
 	} else {
 		// login failed
-		pkg.Log.Error("Login failed",
-			"Check credentials and retry")
+		pkg.Log.Error("Login failed")
+		pkg.Log.Notice("Check credentials and retry")
 	}
 	return
 }
@@ -227,6 +227,7 @@ func miscPrefs() {
 		}, &cfg.Settings.DfltTmplt)
 		cfg.Settings.DfltTmplt--
 		pkg.PrintError(err, "")
+
 	case 1:
 		// set GenOnFetch
 		err := survey.AskOne(&survey.Confirm{

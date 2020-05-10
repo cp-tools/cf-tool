@@ -59,6 +59,5 @@ func ListTmplts(idx ...int) (opts []string) {
 			}
 		}
 	}
-
 	return
 }

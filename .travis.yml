@@ -5,3 +5,8 @@ go:
 
 script:
   - go build
+
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod
