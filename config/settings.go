@@ -9,14 +9,24 @@ import (
 )
 
 // Settings holds configured settings data of the tool
-var Settings = struct {
+var Settings struct {
 	DfltTmplt  int    `json:"default_template"`
 	GenOnFetch bool   `json:"gen_on_fetch"`
 	Host       string `json:"host"`
 	Proxy      string `json:"proxy"`
-}{-1, false, "https://codeforces.com", ""}
+	WSName     string `json:"workspace_name"`
+}
 
 var settPath string
+
+func init() {
+	// initialise default values of Settings struct
+	Settings.DfltTmplt = -1
+	Settings.GenOnFetch = false
+	Settings.Host = "https://codeforces/com"
+	Settings.Proxy = ""
+	Settings.WSName = "codeforces"
+}
 
 // InitSettings reads settings.json file
 func InitSettings(path string) {

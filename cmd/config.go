@@ -214,6 +214,7 @@ func miscPrefs() {
 			"Run gen after fetch",
 			"Set host domain",
 			"Set proxy",
+			"Set workspace name",
 		},
 	}, &choice)
 	pkg.PrintError(err, "")
@@ -267,6 +268,15 @@ func miscPrefs() {
 			_, err := url.ParseRequestURI(ans.(string))
 			return err
 		}))
+		pkg.PrintError(err, "")
+
+	case 4:
+		err := survey.AskOne(&survey.Input{
+			Message: "Workspace folder name:",
+			Help: "Set name of workspace folder, to fetch problems to.\n" +
+				"A root directory will be created of this name, and all problems will be fetched here.\n" +
+				"Current configured workspace name: " + cfg.Settings.WSName,
+		}, &cfg.Settings.WSName, survey.WithValidator(survey.Required))
 		pkg.PrintError(err, "")
 	}
 	cfg.SaveSettings()
