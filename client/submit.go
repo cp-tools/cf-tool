@@ -5,7 +5,6 @@ import (
 	pkg "cf/packages"
 
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/url"
@@ -57,7 +56,7 @@ func Submit(group, contest, contClass, problem, langID, file string, link url.UR
 	doc, _ := goquery.NewDocumentFromReader(bytes.NewReader(body))
 	msg := doc.Find(".error").Text()
 	if msg != "" {
-		return errors.New(msg[2:])
+		return fmt.Errorf(msg[2:])
 	}
 
 	return nil

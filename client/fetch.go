@@ -41,13 +41,15 @@ func FindCountdown(group, contest, contClass string, link url.URL) (int64, error
 func StartCountdown(dur int64) {
 	// run timer till it runs out
 	pkg.LiveUI.Start()
-	ct := time.Now()
 	for ; dur > 0; dur-- {
-		t := ct.Add(time.Duration(dur) * time.Second)
-		pkg.LiveUI.Print(t.Format("15:04:05"))
+		h := fmt.Sprintf("%d:", dur/(60*60))
+		m := fmt.Sprintf("0%d:", (dur/60)%60)
+		s := fmt.Sprintf("0%d", dur%60)
+		pkg.LiveUI.Print(h + m[len(m)-3:] + s[len(s)-2:])
 		time.Sleep(time.Second)
 	}
 	// remove timer data from screen
+	pkg.LiveUI.Print()
 	return
 }
 

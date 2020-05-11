@@ -5,7 +5,7 @@ import (
 	cfg "cf/config"
 	pkg "cf/packages"
 
-	"errors"
+	"fmt"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -72,8 +72,8 @@ func login() {
 		pkg.Log.Notice("Welcome " + cfg.Session.Handle)
 	} else {
 		// login failed
-		pkg.Log.Error("Login failed",
-			"Check credentials and retry")
+		pkg.Log.Error("Login failed")
+		pkg.Log.Notice("Check credentials and retry")
 	}
 	return
 }
@@ -105,7 +105,7 @@ func addTmplt() {
 				path, _ := homedir.Expand(ans.(string))
 				file, err := os.Stat(path)
 				if err != nil || file.IsDir() == true {
-					return errors.New("path doesn't correspond to valid file")
+					return fmt.Errorf("path doesn't correspond to valid file")
 				}
 				return nil
 			},
@@ -129,9 +129,9 @@ func addTmplt() {
 					}
 				}
 				if ans.(string) == "" {
-					return errors.New("Value is required")
+					return fmt.Errorf("Value is required")
 				} else if isPres == true {
-					return errors.New("Template with same alias exists")
+					return fmt.Errorf("Template with same alias exists")
 				}
 				return nil
 			},
@@ -214,6 +214,7 @@ func miscPrefs() {
 			"Run gen after fetch",
 			"Set host domain",
 			"Set proxy",
+			"Set workspace name",
 		},
 	}, &choice)
 	pkg.PrintError(err, "")
@@ -227,6 +228,7 @@ func miscPrefs() {
 		}, &cfg.Settings.DfltTmplt)
 		cfg.Settings.DfltTmplt--
 		pkg.PrintError(err, "")
+
 	case 1:
 		// set GenOnFetch
 		err := survey.AskOne(&survey.Confirm{
@@ -266,6 +268,15 @@ func miscPrefs() {
 			_, err := url.ParseRequestURI(ans.(string))
 			return err
 		}))
+		pkg.PrintError(err, "")
+
+	case 4:
+		err := survey.AskOne(&survey.Input{
+			Message: "Workspace folder name:",
+			Help: "Set name of workspace folder, to fetch problems to.\n" +
+				"A root directory will be created of this name, and all problems will be fetched here.\n" +
+				"Current configured workspace name: " + cfg.Settings.WSName,
+		}, &cfg.Settings.WSName, survey.WithValidator(survey.Required))
 		pkg.PrintError(err, "")
 	}
 	cfg.SaveSettings()

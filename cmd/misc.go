@@ -14,7 +14,7 @@ import (
 )
 
 // Version of the current executable
-const Version = "1.0.0"
+const Version = "1.1.0"
 
 type (
 	// Opts is struct docopt binds flag data to
@@ -84,22 +84,25 @@ func (opt *Opts) FindContestData() {
 			str := filepath.Join(data[i:]...)
 			return strings.TrimSuffix(currPath, str)
 		}
-		// find last directory matching (contests/gym/group)
+		// find last directory matching 'Settings.WSName'
 		for i := sz - 1; i >= 0; i-- {
-			// path corresponds to contest directory
-			if data[i] == "contest" || data[i] == "gym" {
-				opt.contClass = data[i]
-				opt.contest = data[i+1]
-				opt.problem = data[i+2]
-				currPath = clean(i)
-				break
-			} else if data[i] == "group" {
-				opt.contClass = data[i]
-				opt.group = data[i+1]
-				opt.contest = data[i+2]
-				opt.problem = data[i+3]
-				currPath = clean(i)
-				break
+			// current folder name matches configured WSName
+			if data[i] == cfg.Settings.WSName {
+				// path corresponds to contest directory
+				if data[i+1] == "contest" || data[i+1] == "gym" {
+					opt.contClass = data[i+1]
+					opt.contest = data[i+2]
+					opt.problem = data[i+3]
+					currPath = clean(i)
+					break
+				} else if data[i+1] == "group" {
+					opt.contClass = data[i+1]
+					opt.group = data[i+2]
+					opt.contest = data[i+3]
+					opt.problem = data[i+4]
+					currPath = clean(i)
+					break
+				}
 			}
 		}
 	} else if _, err := url.ParseRequestURI(opt.Info[0]); err == nil {
@@ -145,8 +148,8 @@ func (opt *Opts) FindContestData() {
 	}
 	// convert problem id to lowercase
 	opt.problem = strings.ToLower(opt.problem)
-	// set path to folder containing contest
-	opt.dirPath = currPath
+	// set path to folder containing contClass
+	opt.dirPath = filepath.Join(currPath, cfg.Settings.WSName)
 	// set common link to contest
 	// dereference the url variable
 	link, _ := url.Parse(cfg.Settings.Host)
@@ -196,6 +199,7 @@ func (e Env) ReplPlaceholder(text string) string {
 /*
 Parsing structure of problems
 -----------------------------
+- WSName
   - contests
     - ${contest}
       - ${problem}

@@ -40,13 +40,12 @@ Options:
 func main() {
 
 	args, _ := docopt.ParseArgs(manPage, os.Args[1:], cmd.Version)
-	// create ~/.cf/ folder
+	// create ~/cf/ folder
 	path, _ := os.UserConfigDir()
 	path = filepath.Join(path, "cf")
 	os.Mkdir(path, os.ModePerm)
 	// initialise default values of cf tool
 	// WARNING InitSession() depends on InitSettings()
-	// and all depend on InitFormat()
 	cfg.InitTemplates(filepath.Join(path, "templates.json"))
 	cfg.InitSettings(filepath.Join(path, "settings.json"))
 	cfg.InitSession(filepath.Join(path, "sessions.json"))

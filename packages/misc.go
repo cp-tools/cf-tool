@@ -27,7 +27,7 @@ var (
 		count int
 		isAPI bool
 		Start func()
-		Print func(text string)
+		Print func(text ...string)
 	}
 )
 
@@ -42,15 +42,18 @@ func init() {
 	// Initialise Live rendering output
 	LiveUI.isAPI = false
 	LiveUI.Start = func() { LiveUI.count = 0 }
-	LiveUI.Print = func(text string) {
+	LiveUI.Print = func(text ...string) {
 		// clear last count lines from terminal
 		for i := 0; !LiveUI.isAPI && i < LiveUI.count; i++ {
 			ansi.CursorPreviousLine(1)
 			ansi.EraseInLine(2)
 		}
 		// count number of lines in text
-		LiveUI.count = strings.Count(text, "\n") + 1
-		fmt.Println(text)
+		LiveUI.count = 1
+		for _, str := range text {
+			LiveUI.count += strings.Count(str, "\n")
+			fmt.Println(str)
+		}
 	}
 }
 

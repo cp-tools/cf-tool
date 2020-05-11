@@ -5,7 +5,7 @@ import (
 	pkg "cf/packages"
 
 	"bytes"
-	"errors"
+	"fmt"
 	"net/url"
 	"path"
 	"strconv"
@@ -44,7 +44,7 @@ func FetchSubs(contest, problem, handle string) ([]Sub, error) {
 	status := gjson.GetBytes(body, "status").String()
 	if status != "OK" {
 		comm := gjson.GetBytes(body, "comment").String()
-		return nil, errors.New(comm)
+		return nil, fmt.Errorf(comm)
 	}
 	// is another submission to same problem considered
 	isParsed := make(map[string]bool)

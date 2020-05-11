@@ -13,7 +13,7 @@ import (
 )
 
 // Session holds cookies and other request header data
-// password is encrypted and stored securely
+// password is AES encrypted and stored securely
 var Session struct {
 	Handle  string         `json:"handle"`
 	Passwd  string         `json:"password"`
