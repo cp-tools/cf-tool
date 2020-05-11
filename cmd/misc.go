@@ -199,6 +199,7 @@ func (e Env) ReplPlaceholder(text string) string {
 /*
 Parsing structure of problems
 -----------------------------
+- WSName
   - contests
     - ${contest}
       - ${problem}
