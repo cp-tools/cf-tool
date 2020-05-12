@@ -65,6 +65,8 @@ func WatchSubmissions(group, contest, contClass, query string, link url.URL) ([]
 				return pkg.Red.Sprint(verdict)
 			case strings.HasPrefix(verdict, "WA"):
 				return pkg.Red.Sprint(verdict)
+			case strings.HasPrefix(verdict, "Pretests passed"):
+				return pkg.Green.Sprint(verdict)
 			case strings.HasPrefix(verdict, "Accepted"):
 				return pkg.Green.Sprint(verdict)
 			default:
