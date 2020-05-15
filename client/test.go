@@ -222,6 +222,9 @@ func PrintDiff(inp, out, ans string) {
 	for i := 0; i < len(str1); i++ {
 		tbl.AddRow(str1[i], str2[i])
 	}
+	// @todo return string of output diff table instead of printing it
+	// @body all printing tasks are strictly restricted to cmd package.
+	// @body This package only returns requested data
 	fmt.Fprintln(os.Stderr, tbl)
 	fmt.Println()
 

@@ -55,7 +55,7 @@ func (opt Opts) RunSubmit() {
 	}
 
 	// main submit code runs here
-	err = cln.Submit(opt.group, opt.contest, opt.contClass, opt.problem, t.LangID, file, opt.link)
+	err = cln.Submit(opt.group, opt.contest, opt.problem, t.LangID, file, opt.link)
 	pkg.PrintError(err, "Failed to submit source code")
 	pkg.Log.Success("Submitted")
 	// watch submission verdict
@@ -71,7 +71,7 @@ func (opt Opts) watch() {
 		// fetch submission status from contest every second
 		start := time.Now()
 
-		data, err := cln.WatchSubmissions(opt.group, opt.contest, opt.contClass, opt.problem, opt.link)
+		data, err := cln.WatchSubmissions(opt.group, opt.contest, opt.problem, opt.link)
 		pkg.PrintError(err, "Failed to extract submissions in contest.")
 		sub := data[0]
 

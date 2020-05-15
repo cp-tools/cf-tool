@@ -31,7 +31,7 @@ type (
 // WatchSubmissions finds all submissions in contID that matches query string
 // query = problem to fetch all submissions in a particular problem (should be uppercase)
 // query = submitID to fetch submission of given submission id
-func WatchSubmissions(group, contest, contClass, query string, link url.URL) ([]Submission, error) {
+func WatchSubmissions(group, contest, query string, link url.URL) ([]Submission, error) {
 	// This implementation contains redirection prevention
 	c := cfg.Session.Client
 	c.CheckRedirect = pkg.RedirectCheck
@@ -42,7 +42,7 @@ func WatchSubmissions(group, contest, contClass, query string, link url.URL) ([]
 		return nil, err
 	} else if len(body) == 0 {
 		// such page doesn't exist
-		err = fmt.Errorf("%v %v doesn't exist", contClass, contest)
+		err = fmt.Errorf("Contest %v doesn't exist", contest)
 		return nil, err
 	}
 	// to hold all submissions
@@ -90,7 +90,7 @@ func WatchSubmissions(group, contest, contClass, query string, link url.URL) ([]
 }
 
 // WatchContest parses contest solved count status
-func WatchContest(group, contest, contClass string, link url.URL) ([]Problem, error) {
+func WatchContest(group, contest string, link url.URL) ([]Problem, error) {
 	// This implementation contains redirection prevention
 	c := cfg.Session.Client
 	c.CheckRedirect = pkg.RedirectCheck
@@ -100,7 +100,7 @@ func WatchContest(group, contest, contClass string, link url.URL) ([]Problem, er
 		return nil, err
 	} else if len(body) == 0 {
 		// such page doesn't exist
-		err = fmt.Errorf("%v %v doesn't exist", contClass, contest)
+		err = fmt.Errorf("Contest %v doesn't exist", contest)
 		return nil, err
 	}
 	// to hold all problems in contest

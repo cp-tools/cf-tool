@@ -27,7 +27,7 @@ func (opt Opts) RunWatch() {
 		// parse contest solve status instead
 
 		// fetch contest solve status
-		data, err := cln.WatchContest(opt.group, opt.contest, opt.contClass, opt.link)
+		data, err := cln.WatchContest(opt.group, opt.contest, opt.link)
 		pkg.PrintError(err, "Failed to extract contest solve status")
 
 		// init table with header + color
@@ -72,7 +72,7 @@ func (opt Opts) RunWatch() {
 			// timer to fetch data in interval of 1 second
 			start := time.Now()
 			// fetch contest submission status
-			data, err := cln.WatchSubmissions(opt.group, opt.contest, opt.contClass, opt.problem, opt.link)
+			data, err := cln.WatchSubmissions(opt.group, opt.contest, opt.problem, opt.link)
 			pkg.PrintError(err, "Failed to extract submissions in contest")
 
 			// create new table
