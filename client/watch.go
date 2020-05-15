@@ -28,10 +28,10 @@ type (
 	}
 )
 
-// WatchSubmissions finds all submissions in contID that matches query string
+// WatchSubmissions finds all submissions in contest that matches query string
 // query = problem to fetch all submissions in a particular problem (should be uppercase)
 // query = submitID to fetch submission of given submission id
-func WatchSubmissions(group, contest, query string, link url.URL) ([]Submission, error) {
+func WatchSubmissions(contest, query string, link url.URL) ([]Submission, error) {
 	// This implementation contains redirection prevention
 	c := cfg.Session.Client
 	c.CheckRedirect = pkg.RedirectCheck
@@ -90,7 +90,7 @@ func WatchSubmissions(group, contest, query string, link url.URL) ([]Submission,
 }
 
 // WatchContest parses contest solved count status
-func WatchContest(group, contest string, link url.URL) ([]Problem, error) {
+func WatchContest(contest string, link url.URL) ([]Problem, error) {
 	// This implementation contains redirection prevention
 	c := cfg.Session.Client
 	c.CheckRedirect = pkg.RedirectCheck

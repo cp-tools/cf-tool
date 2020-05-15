@@ -15,7 +15,7 @@ import (
 )
 
 // Submit uploads form data and submits user code
-func Submit(group, contest, problem, langID, file string, link url.URL) error {
+func Submit(contest, problem, langID, file string, link url.URL) error {
 	// form redirection prevention is removed while submitting
 	c := cfg.Session.Client
 	c.CheckRedirect = pkg.RedirectCheck

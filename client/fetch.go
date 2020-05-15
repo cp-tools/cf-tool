@@ -15,7 +15,7 @@ import (
 )
 
 // FindCountdown parses countdown (if exists) from countdown page
-func FindCountdown(group, contest string, link url.URL) (int64, error) {
+func FindCountdown(contest string, link url.URL) (int64, error) {
 	// This implementation contains redirection prevention
 	c := cfg.Session.Client
 	c.CheckRedirect = pkg.RedirectCheck
@@ -52,7 +52,7 @@ func StartCountdown(dur int64) {
 }
 
 // FetchProbs finds all problems present in the contest
-func FetchProbs(group, contest string, link url.URL) ([]string, error) {
+func FetchProbs(contest string, link url.URL) ([]string, error) {
 	// no need of modifying link as it already points to dashboard
 	c := cfg.Session.Client
 	body, err := pkg.GetReqBody(&c, link.String())
@@ -74,7 +74,7 @@ func FetchProbs(group, contest string, link url.URL) ([]string, error) {
 // If problem == "", fetch all problem test cases
 // else, only fetch of given problem.
 // fix for https://github.com/infixint943/cf/pull/2#issuecomment-626122011
-func FetchTests(group, contest, problem string, link url.URL) ([][]string, [][]string, error) {
+func FetchTests(contest, problem string, link url.URL) ([][]string, [][]string, error) {
 
 	c := cfg.Session.Client
 	if problem == "" {
