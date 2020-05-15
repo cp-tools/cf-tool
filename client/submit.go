@@ -16,7 +16,7 @@ import (
 
 // Submit uploads form data and submits user code
 func Submit(group, contest, contClass, problem, langID, file string, link url.URL) error {
-
+	// form redirection prevention is removed while submitting
 	c := cfg.Session.Client
 	c.CheckRedirect = pkg.RedirectCheck
 	link.Path = path.Join(link.Path, "submit")
@@ -25,7 +25,7 @@ func Submit(group, contest, contClass, problem, langID, file string, link url.UR
 		return err
 	} else if len(body) == 0 {
 		// such page doesn't exist
-		err = fmt.Errorf("%v %v%v doesn't exist", contClass, contest, problem)
+		err = fmt.Errorf("%v %v doesn't exist", contClass, contest)
 		return err
 	}
 

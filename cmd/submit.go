@@ -68,7 +68,7 @@ func (opt Opts) watch() {
 	// infinite loop till verdicts declared
 	pkg.LiveUI.Start()
 	for {
-		// fetch submission from contest every second
+		// fetch submission status from contest every second
 		start := time.Now()
 
 		data, err := cln.WatchSubmissions(opt.group, opt.contest, opt.contClass, opt.problem, opt.link)
