@@ -67,13 +67,15 @@ func (opt Opts) RunSubmit() {
 func (opt Opts) watch() {
 	// infinite loop till verdicts declared
 	pkg.LiveUI.Start()
-	for {
+	for query := opt.problem; ; {
+		// query param to fetch submitted code verdict and not latest verdict in prob
 		// fetch submission status from contest every second
 		start := time.Now()
 
-		data, err := cln.WatchSubmissions(opt.group, opt.contest, opt.problem, opt.link)
+		data, err := cln.WatchSubmissions(opt.group, opt.contest, query, opt.link)
 		pkg.PrintError(err, "Failed to extract submissions in contest.")
 		sub := data[0]
+		query = sub.ID
 
 		tbl := uitable.New()
 		tbl.Separator = " "
