@@ -85,7 +85,8 @@ func (opt Opts) tradJudge(t cfg.Template, e Env) {
 		case stdout != out[i]:
 			// print WA message and diff output
 			pkg.Red.Printf("#%d: WA .... %v\n", i, elapsed.String())
-			cln.PrintDiff(inp[i], stdout, out[i])
+			diff := cln.PrintDiff(inp[i], stdout, out[i])
+			pkg.Log.Info(diff)
 
 		default:
 			// print AC message
