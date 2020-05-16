@@ -51,7 +51,7 @@ func (opt Opts) RunPull() {
 				relPath := strings.TrimPrefix(filepath.Join(path, name), cwd)
 
 				pkg.CreateFile(source, filepath.Join(path, name))
-				pkg.Log.Success(fmt.Sprintf("Fetched %v %v to ..%v",
+				pkg.Log.Success(fmt.Sprintf("Fetched %v %v to .%v",
 					sub.Contest, sub.Problem, relPath))
 				break
 			}

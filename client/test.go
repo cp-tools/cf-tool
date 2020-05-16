@@ -131,7 +131,7 @@ func Validator(out, ans string, igCase bool, exp int) (string, string) {
 			data = strings.ToLower(data)
 		}
 		outData := ""
-		// omit exp difference <= 1e-<exp>
+		// omit exp difference < 1e-<exp>
 		for _, line := range strings.Split(data, "\n") {
 			outLine := ""
 			for _, wrd := range strings.Split(line, " ") {

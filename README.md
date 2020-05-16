@@ -76,7 +76,6 @@ This tool actually draws most of its inspiration from [xalanq/cf-tool](https://g
 - Unification of redundant commands (`pull` and `clone`, `parse` and `race`)
 - New custom checkers for testing - case insensitivity, ignore difference in decimal output after certain EPS, custom time limit.
 - Improved code logic, leading to faster fetching of sample tests.
-- [WIP] API functionality to return plain text output (without escape sequence).
 - A much better line-by-line diff comparision (as compared to the traditional diff tool, which isn't very helpful to compare multi line outputs) 
 
 Apart from these changes, the code has been restructured entirely, resulting in a much shorter and clean code base (helpful for contributors, as everything is well commented in the project).  

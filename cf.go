@@ -26,7 +26,7 @@ Options:
   -A, --all                   force the selection menu to appear
   -f, --file <f>              specify source file to test / submit [default: *.*]
   -i, --ignore-case           omit character-case differences in output
-  -e, --ignore-exp <e>        omit float differences <= 1e-<e> [default: 10]
+  -e, --ignore-exp <e>        omit float differences < 1e-<e> [default: 10]
   -t, --time-limit <t>        set time limit (secs) for each test case [default: 2] 
   -s, --submissions <cnt>     watch status of last <cnt> submissions [default: 0] 
   -H, --handle <handle>       cf handle (not email) of reqd user  
