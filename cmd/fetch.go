@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 // RunFetch is called on running cf fetch
@@ -27,7 +28,7 @@ func (opt Opts) RunFetch() {
 	if dur > 0 {
 		pkg.Log.Warning("Contest hasn't started")
 		pkg.Log.Info("Launching countdown to start")
-		cln.StartCountdown(dur)
+		startCountdown(dur)
 		// open problems page (once parsing is over)
 		// page will be opened only for live rounds
 		defer opt.RunOpen()
@@ -101,5 +102,21 @@ func (opt Opts) RunFetch() {
 		}
 	}
 
+	return
+}
+
+// startCountdown starts countdown of dur seconds
+func startCountdown(dur int64) {
+	// run timer till it runs out
+	pkg.LiveUI.Start()
+	for ; dur > 0; dur-- {
+		h := fmt.Sprintf("%d:", dur/(60*60))
+		m := fmt.Sprintf("0%d:", (dur/60)%60)
+		s := fmt.Sprintf("0%d", dur%60)
+		pkg.LiveUI.Print(h + m[len(m)-3:] + s[len(s)-2:])
+		time.Sleep(time.Second)
+	}
+	// remove timer data from screen
+	pkg.LiveUI.Print()
 	return
 }

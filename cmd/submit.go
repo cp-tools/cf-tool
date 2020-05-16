@@ -18,10 +18,10 @@ func (opt Opts) RunSubmit() {
 		return
 	}
 	// find code file to submit
-	file, err := cln.FindSourceFiles(opt.File)
+	file, err := selSourceFile(cln.FindSourceFiles(opt.File))
 	pkg.PrintError(err, "Failed to select source file")
 	// find template config to use
-	t, err := cln.FindTmpltsConfig(file)
+	t, err := selTmpltConfig(cln.FindTmpltsConfig(file))
 	pkg.PrintError(err, "Failed to select template configuration")
 
 	// check login status

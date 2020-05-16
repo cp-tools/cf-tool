@@ -17,16 +17,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/fatih/color"
 	"github.com/gosuri/uitable"
 )
-
-/*
-	@todo Refractor code to migrate input/output in package cln
-	@body Refractor FindSourceFiles() and FindTmpltsConfig() to
-	@body only return all matching data.
-*/
 
 // FindTests finds all returns all sample input/output
 // files present in the current directory
@@ -69,7 +62,7 @@ func FindTests() ([]string, []string, error) {
 
 // FindSourceFiles finds all code files in current dir
 // with file name matching pattern
-func FindSourceFiles(pattern string) (string, error) {
+func FindSourceFiles(pattern string) []string {
 	// current pattern implementation follows *.*
 	// and input/output files are excluded while checking
 	// for existence of template config (L58-L66)
@@ -85,55 +78,21 @@ func FindSourceFiles(pattern string) (string, error) {
 			}
 		}
 	}
-	// validate and set source file
-	if len(files) == 0 {
-		err := fmt.Errorf("No source files found\n" +
-			"Ensure a suitable configured template exists")
-		return "", err
-	} else if len(files) == 1 {
-		// set source file (only 1 present)
-		return files[0], nil
-	}
-
-	// prompt user for code file to set as source file
-	file := ""
-	err := survey.AskOne(&survey.Select{
-		Message: "Source file:",
-		Options: files,
-	}, &file)
-	pkg.PrintError(err, "")
-	return file, nil
+	return files
 }
 
 // FindTmpltsConfig finds all templates matching extension
 // of `file` and returns all suitable template alias
-func FindTmpltsConfig(file string) (*cfg.Template, error) {
+func FindTmpltsConfig(file string) []cfg.Template {
 	// index of valid template configurations
-	var id []int
-	for i, t := range cfg.Templates {
+	var templ []cfg.Template
+	for _, t := range cfg.Templates {
 		// file extensions match = valid config
 		if t.Ext == filepath.Ext(file) {
-			id = append(id, i)
+			templ = append(templ, t)
 		}
 	}
-	// validate and set template config
-	if len(id) == 0 {
-		err := fmt.Errorf("No template configuration found\n" +
-			"Ensure a suitable configured template exists")
-		return nil, err
-	} else if len(id) == 1 {
-		// set template configuration (only 1 present)
-		return &cfg.Templates[id[0]], nil
-	}
-
-	// prompt user for template configuration to select
-	var idx int
-	err := survey.AskOne(&survey.Select{
-		Message: "Template configuration:",
-		Options: cfg.ListTmplts(id...),
-	}, &idx)
-	pkg.PrintError(err, "")
-	return &cfg.Templates[idx], nil
+	return templ
 }
 
 // ExecScript runs script with input and timeout and returns the

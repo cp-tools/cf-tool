@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"path"
 	"strings"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -35,22 +34,6 @@ func FindCountdown(contest string, link url.URL) (int64, error) {
 	var h, m, s int64
 	fmt.Sscanf(val, "%d:%d:%d", &h, &m, &s)
 	return h*3600 + m*60 + s, nil
-}
-
-// StartCountdown starts countdown of dur seconds
-func StartCountdown(dur int64) {
-	// run timer till it runs out
-	pkg.LiveUI.Start()
-	for ; dur > 0; dur-- {
-		h := fmt.Sprintf("%d:", dur/(60*60))
-		m := fmt.Sprintf("0%d:", (dur/60)%60)
-		s := fmt.Sprintf("0%d", dur%60)
-		pkg.LiveUI.Print(h + m[len(m)-3:] + s[len(s)-2:])
-		time.Sleep(time.Second)
-	}
-	// remove timer data from screen
-	pkg.LiveUI.Print()
-	return
 }
 
 // FetchProbs finds all problems present in the contest

@@ -2,7 +2,9 @@ package cmd
 
 import (
 	cfg "cf/config"
+	pkg "cf/packages"
 
+	"fmt"
 	"net/url"
 	"os"
 	"path"
@@ -11,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/AlecAivazis/survey/v2"
 )
 
 // Version of the current executable
@@ -194,6 +198,48 @@ func (e Env) ReplPlaceholder(text string) string {
 	}
 
 	return text
+}
+
+// Prompt user to select source file to test/submit
+func selSourceFile(files []string) (string, error) {
+	// validate and set source file
+	if len(files) == 0 {
+		err := fmt.Errorf("No source files found\n" +
+			"Ensure a suitable configured template exists")
+		return "", err
+	} else if len(files) == 1 {
+		// set source file (only 1 present)
+		return files[0], nil
+	}
+	// prompt user for code file to set as source file
+	file := ""
+	err := survey.AskOne(&survey.Select{
+		Message: "Source file:",
+		Options: files,
+	}, &file)
+	pkg.PrintError(err, "")
+	return file, nil
+}
+
+// Prompt user to select template configuration to use
+func selTmpltConfig(tmplt []cfg.Template) (*cfg.Template, error) {
+	// validate and set template config
+	if len(tmplt) == 0 {
+		err := fmt.Errorf("No template configuration found\n" +
+			"Ensure a suitable configured template exists")
+		return nil, err
+	} else if len(tmplt) == 1 {
+		// set template configuration (only 1 present)
+		return &tmplt[0], nil
+	}
+	// prompt user for template configuration to select
+	var idx int
+	err := survey.AskOne(&survey.Select{
+		Message: "Template configuration:",
+		Options: cfg.ListTmplts(tmplt...),
+	}, &idx)
+	pkg.PrintError(err, "")
+	return &tmplt[idx], nil
 }
 
 /*
