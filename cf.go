@@ -3,7 +3,6 @@ package main
 import (
 	cmd "cf/cmd"
 	cfg "cf/config"
-	pkg "cf/packages"
 
 	"os"
 	"path/filepath"
@@ -15,11 +14,11 @@ const manPage = `
 Usage:
   cf config
   cf gen    [-A]
-  cf open   [<info>...] [--api]
-  cf fetch  [<info>...] [--api]
-  cf test   [[-i -e<e> -t<t>] | -C] [-f<f>] [--api]
-  cf submit [<info>... -f<f>] [--api]
-  cf watch  [<info>... -s<cnt>] [--api]
+  cf open   [<info>...]
+  cf fetch  [<info>...]
+  cf test   [[-i -e<e> -t<t>] | -C] [-f<f>]
+  cf submit [<info>... -f<f>]
+  cf watch  [<info>... -s<cnt>]
   cf pull   [<info>...] -H<handle>
   cf upgrade
 
@@ -32,7 +31,6 @@ Options:
   -s, --submissions <cnt>     watch status of last <cnt> submissions [default: 0] 
   -H, --handle <handle>       cf handle (not email) of reqd user  
   -C, --custom                run interactive session, with input from stdin
-      --api                   remove all escape sequences from output
   -h, --help                  show this screen
   -v, --version               show cli version
 `
@@ -54,7 +52,6 @@ func main() {
 	opt := cmd.Opts{}
 	args.Bind(&opt)
 	opt.FindContestData()
-	pkg.IsAPI(opt.API)
 
 	// run function based on subcommand
 	switch {
