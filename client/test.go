@@ -6,7 +6,6 @@ import (
 
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -59,10 +58,10 @@ func FindTests() ([]string, []string, error) {
 	// check for i/o count equality
 	// and existence of non-zero test files
 	if len(inp) != len(out) {
-		err := errors.New("Unequal number of input/output test files")
+		err := fmt.Errorf("Unequal number of input/output test files")
 		return nil, nil, err
 	} else if len(inp) == 0 {
-		err := errors.New("No test files found")
+		err := fmt.Errorf("No test files found")
 		return nil, nil, err
 	}
 	return inp, out, nil
@@ -88,7 +87,7 @@ func FindSourceFiles(pattern string) (string, error) {
 	}
 	// validate and set source file
 	if len(files) == 0 {
-		err := errors.New("No source files found\n" +
+		err := fmt.Errorf("No source files found\n" +
 			"Ensure a suitable configured template exists")
 		return "", err
 	} else if len(files) == 1 {
@@ -119,7 +118,7 @@ func FindTmpltsConfig(file string) (*cfg.Template, error) {
 	}
 	// validate and set template config
 	if len(id) == 0 {
-		err := errors.New("No template configuration found\n" +
+		err := fmt.Errorf("No template configuration found\n" +
 			"Ensure a suitable configured template exists")
 		return nil, err
 	} else if len(id) == 1 {

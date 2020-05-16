@@ -5,7 +5,7 @@ import (
 	cfg "cf/config"
 	pkg "cf/packages"
 
-	"errors"
+	"fmt"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -105,7 +105,7 @@ func addTmplt() {
 				path, _ := homedir.Expand(ans.(string))
 				file, err := os.Stat(path)
 				if err != nil || file.IsDir() == true {
-					return errors.New("path doesn't correspond to valid file")
+					return fmt.Errorf("path doesn't correspond to valid file")
 				}
 				return nil
 			},
@@ -129,9 +129,9 @@ func addTmplt() {
 					}
 				}
 				if ans.(string) == "" {
-					return errors.New("Value is required")
+					return fmt.Errorf("Value is required")
 				} else if isPres == true {
-					return errors.New("Template with same alias exists")
+					return fmt.Errorf("Template with same alias exists")
 				}
 				return nil
 			},
