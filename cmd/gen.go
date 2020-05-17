@@ -28,7 +28,7 @@ func (opt Opts) RunGen() {
 		// ask user to select desired template
 		err := survey.AskOne(&survey.Select{
 			Message: "Select template to generate:",
-			Options: cfg.ListTmplts(-1),
+			Options: cfg.ListTmplts(cfg.Templates...),
 		}, &idx)
 		pkg.PrintError(err, "")
 	}

@@ -25,7 +25,6 @@ var (
 	// LiveUI to print live data to terminal
 	LiveUI struct {
 		count int
-		isAPI bool
 		Start func()
 		Print func(text ...string)
 	}
@@ -40,11 +39,10 @@ func init() {
 	Log.Warning = func(text ...interface{}) { Yellow.Fprintln(writer, text...) }
 
 	// Initialise Live rendering output
-	LiveUI.isAPI = false
 	LiveUI.Start = func() { LiveUI.count = 0 }
 	LiveUI.Print = func(text ...string) {
 		// clear last count lines from terminal
-		for i := 0; !LiveUI.isAPI && i < LiveUI.count; i++ {
+		for i := 0; i < LiveUI.count; i++ {
 			ansi.CursorPreviousLine(1)
 			ansi.EraseInLine(2)
 		}
@@ -55,14 +53,6 @@ func init() {
 			fmt.Println(str)
 		}
 	}
-}
-
-// IsAPI configures output settings based on flag
-func IsAPI(flag bool) {
-	// disable color
-	color.NoColor = flag
-	// disable line overwriting
-	LiveUI.isAPI = flag
 }
 
 // PrintError outputs error (with custom message)

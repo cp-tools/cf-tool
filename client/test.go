@@ -17,7 +17,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/fatih/color"
 	"github.com/gosuri/uitable"
 )
@@ -63,7 +62,7 @@ func FindTests() ([]string, []string, error) {
 
 // FindSourceFiles finds all code files in current dir
 // with file name matching pattern
-func FindSourceFiles(pattern string) (string, error) {
+func FindSourceFiles(pattern string) []string {
 	// current pattern implementation follows *.*
 	// and input/output files are excluded while checking
 	// for existence of template config (L58-L66)
@@ -79,55 +78,21 @@ func FindSourceFiles(pattern string) (string, error) {
 			}
 		}
 	}
-	// validate and set source file
-	if len(files) == 0 {
-		err := fmt.Errorf("No source files found\n" +
-			"Ensure a suitable configured template exists")
-		return "", err
-	} else if len(files) == 1 {
-		// set source file (only 1 present)
-		return files[0], nil
-	}
-
-	// prompt user for code file to set as source file
-	file := ""
-	err := survey.AskOne(&survey.Select{
-		Message: "Source file:",
-		Options: files,
-	}, &file)
-	pkg.PrintError(err, "")
-	return file, nil
+	return files
 }
 
 // FindTmpltsConfig finds all templates matching extension
 // of `file` and returns all suitable template alias
-func FindTmpltsConfig(file string) (*cfg.Template, error) {
+func FindTmpltsConfig(file string) []cfg.Template {
 	// index of valid template configurations
-	var id []int
-	for i, t := range cfg.Templates {
+	var templ []cfg.Template
+	for _, t := range cfg.Templates {
 		// file extensions match = valid config
 		if t.Ext == filepath.Ext(file) {
-			id = append(id, i)
+			templ = append(templ, t)
 		}
 	}
-	// validate and set template config
-	if len(id) == 0 {
-		err := fmt.Errorf("No template configuration found\n" +
-			"Ensure a suitable configured template exists")
-		return nil, err
-	} else if len(id) == 1 {
-		// set template configuration (only 1 present)
-		return &cfg.Templates[id[0]], nil
-	}
-
-	// prompt user for template configuration to select
-	var idx int
-	err := survey.AskOne(&survey.Select{
-		Message: "Template configuration:",
-		Options: cfg.ListTmplts(id...),
-	}, &idx)
-	pkg.PrintError(err, "")
-	return &cfg.Templates[idx], nil
+	return templ
 }
 
 // ExecScript runs script with input and timeout and returns the
@@ -166,7 +131,7 @@ func Validator(out, ans string, igCase bool, exp int) (string, string) {
 			data = strings.ToLower(data)
 		}
 		outData := ""
-		// omit exp difference <= 1e-<exp>
+		// omit exp difference < 1e-<exp>
 		for _, line := range strings.Split(data, "\n") {
 			outLine := ""
 			for _, wrd := range strings.Split(line, " ") {
@@ -194,13 +159,14 @@ func Validator(out, ans string, igCase bool, exp int) (string, string) {
 }
 
 // PrintDiff is run if outputs don't match
-// prints input data, and then the diff of out vs ans
-// prints all data to stderr, since it's debugging info
-func PrintDiff(inp, out, ans string) {
+// returns input data, and then the diff of => out vs ans
+func PrintDiff(inp, out, ans string) string {
+	// variable to hold diff output
+	var diff strings.Builder
 	headerfmt := pkg.Blue.Add(color.Underline).SprintfFunc()
 	// print input data
-	fmt.Fprintln(os.Stderr, headerfmt("Input"))
-	fmt.Fprintln(os.Stderr, inp)
+	fmt.Fprintln(&diff, headerfmt("Input"))
+	fmt.Fprintln(&diff, inp)
 
 	// break output into lines
 	str1 := strings.Split(out, "\n")
@@ -221,8 +187,8 @@ func PrintDiff(inp, out, ans string) {
 	for i := 0; i < len(str1); i++ {
 		tbl.AddRow(str1[i], str2[i])
 	}
-	fmt.Fprintln(os.Stderr, tbl)
-	fmt.Println()
+	fmt.Fprintln(&diff, tbl)
+	fmt.Fprintln(&diff)
 
-	return
+	return diff.String()
 }

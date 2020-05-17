@@ -13,10 +13,10 @@ import (
 // RunTest is called on running `cf test`
 func (opt Opts) RunTest() {
 	// find code file to test
-	file, err := cln.FindSourceFiles(opt.File)
+	file, err := selSourceFile(cln.FindSourceFiles(opt.File))
 	pkg.PrintError(err, "Failed to select source file")
 	// find template configs to use
-	t, err := cln.FindTmpltsConfig(file)
+	t, err := selTmpltConfig(cln.FindTmpltsConfig(file))
 	pkg.PrintError(err, "Failed to select template configuration")
 
 	// main testing starts here!!
@@ -85,7 +85,8 @@ func (opt Opts) tradJudge(t cfg.Template, e Env) {
 		case stdout != out[i]:
 			// print WA message and diff output
 			pkg.Red.Printf("#%d: WA .... %v\n", i, elapsed.String())
-			cln.PrintDiff(inp[i], stdout, out[i])
+			diff := cln.PrintDiff(inp[i], stdout, out[i])
+			pkg.Log.Info(diff)
 
 		default:
 			// print AC message

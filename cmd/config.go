@@ -187,7 +187,7 @@ func remTmplt() {
 	var idx int
 	err := survey.AskOne(&survey.Select{
 		Message: "Template you want to remove:",
-		Options: cfg.ListTmplts(-1),
+		Options: cfg.ListTmplts(cfg.Templates...),
 	}, &idx)
 	pkg.PrintError(err, "")
 	// delete the template from the slice
@@ -224,7 +224,7 @@ func miscPrefs() {
 		// set default template
 		err := survey.AskOne(&survey.Select{
 			Message: "Select template",
-			Options: append([]string{"None"}, cfg.ListTmplts(-1)...),
+			Options: append([]string{"None"}, cfg.ListTmplts(cfg.Templates...)...),
 		}, &cfg.Settings.DfltTmplt)
 		cfg.Settings.DfltTmplt--
 		pkg.PrintError(err, "")

@@ -29,7 +29,7 @@ func FetchSubs(contest, problem, handle string) ([]Sub, error) {
 
 	c := cfg.Session.Client
 	link, _ := url.Parse(cfg.Settings.Host)
-	link.Path = path.Join(link.Path, "api", `user.status`)
+	link.Path = path.Join(link.Path, "api", "user.status")
 	// add parameter to link
 	q := link.Query()
 	q.Set("handle", handle)

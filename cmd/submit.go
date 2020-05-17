@@ -18,10 +18,10 @@ func (opt Opts) RunSubmit() {
 		return
 	}
 	// find code file to submit
-	file, err := cln.FindSourceFiles(opt.File)
+	file, err := selSourceFile(cln.FindSourceFiles(opt.File))
 	pkg.PrintError(err, "Failed to select source file")
 	// find template config to use
-	t, err := cln.FindTmpltsConfig(file)
+	t, err := selTmpltConfig(cln.FindTmpltsConfig(file))
 	pkg.PrintError(err, "Failed to select template configuration")
 
 	// check login status
@@ -55,7 +55,7 @@ func (opt Opts) RunSubmit() {
 	}
 
 	// main submit code runs here
-	err = cln.Submit(opt.group, opt.contest, opt.contClass, opt.problem, t.LangID, file, opt.link)
+	err = cln.Submit(opt.contest, opt.problem, t.LangID, file, opt.link)
 	pkg.PrintError(err, "Failed to submit source code")
 	pkg.Log.Success("Submitted")
 	// watch submission verdict
@@ -67,18 +67,21 @@ func (opt Opts) RunSubmit() {
 func (opt Opts) watch() {
 	// infinite loop till verdicts declared
 	pkg.LiveUI.Start()
-	for {
-		// fetch submission from contest every second
+	for query := opt.problem; ; {
+		// query param to fetch submitted code verdict and not latest verdict in prob
+		// fetch submission status from contest every second
 		start := time.Now()
 
-		data, err := cln.WatchSubmissions(opt.group, opt.contest, opt.contClass, opt.problem, opt.link)
+		data, err := cln.WatchSubmissions(opt.contest, query, opt.link)
 		pkg.PrintError(err, "Failed to extract submissions in contest.")
 		sub := data[0]
+		query = sub.ID
 
 		tbl := uitable.New()
 		tbl.Separator = " "
-		tbl.AddRow("Verdict:", sub.Verdict)
 
+		sub.Verdict = prettyVerdict(sub.Verdict)
+		tbl.AddRow("Verdict:", sub.Verdict)
 		if sub.Waiting == "false" {
 			tbl.AddRow("Memory:", sub.Memory)
 			tbl.AddRow("Time:", sub.Time)

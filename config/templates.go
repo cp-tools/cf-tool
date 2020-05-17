@@ -48,16 +48,11 @@ func SaveTemplates() {
 	file.Write(body)
 }
 
-// ListTmplts returns a array of required template aliases
-// if idx == -1, returns entire list
-// else, returns data of Templates[idx]
-func ListTmplts(idx ...int) (opts []string) {
-	for _, id := range idx {
-		for i, t := range Templates {
-			if id == -1 || id == i {
-				opts = append(opts, t.Alias)
-			}
-		}
+// ListTmplts returns an array of required template aliases
+// basically, just extracts all template aliases of tmplt
+func ListTmplts(tmplt ...Template) (opts []string) {
+	for _, t := range tmplt {
+		opts = append(opts, t.Alias)
 	}
 	return
 }

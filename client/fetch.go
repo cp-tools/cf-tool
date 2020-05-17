@@ -9,13 +9,12 @@ import (
 	"net/url"
 	"path"
 	"strings"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
 // FindCountdown parses countdown (if exists) from countdown page
-func FindCountdown(group, contest, contClass string, link url.URL) (int64, error) {
+func FindCountdown(contest string, link url.URL) (int64, error) {
 	// This implementation contains redirection prevention
 	c := cfg.Session.Client
 	c.CheckRedirect = pkg.RedirectCheck
@@ -25,7 +24,7 @@ func FindCountdown(group, contest, contClass string, link url.URL) (int64, error
 		return 0, err
 	} else if len(body) == 0 {
 		// such page doesn't exist
-		err = fmt.Errorf("%v %v doesn't exist", contClass, contest)
+		err = fmt.Errorf("Contest %v doesn't exist", contest)
 		return 0, err
 	}
 
@@ -37,24 +36,8 @@ func FindCountdown(group, contest, contClass string, link url.URL) (int64, error
 	return h*3600 + m*60 + s, nil
 }
 
-// StartCountdown starts countdown of dur seconds
-func StartCountdown(dur int64) {
-	// run timer till it runs out
-	pkg.LiveUI.Start()
-	for ; dur > 0; dur-- {
-		h := fmt.Sprintf("%d:", dur/(60*60))
-		m := fmt.Sprintf("0%d:", (dur/60)%60)
-		s := fmt.Sprintf("0%d", dur%60)
-		pkg.LiveUI.Print(h + m[len(m)-3:] + s[len(s)-2:])
-		time.Sleep(time.Second)
-	}
-	// remove timer data from screen
-	pkg.LiveUI.Print()
-	return
-}
-
 // FetchProbs finds all problems present in the contest
-func FetchProbs(group, contest, contClass string, link url.URL) ([]string, error) {
+func FetchProbs(contest string, link url.URL) ([]string, error) {
 	// no need of modifying link as it already points to dashboard
 	c := cfg.Session.Client
 	body, err := pkg.GetReqBody(&c, link.String())
@@ -76,7 +59,7 @@ func FetchProbs(group, contest, contClass string, link url.URL) ([]string, error
 // If problem == "", fetch all problem test cases
 // else, only fetch of given problem.
 // fix for https://github.com/infixint943/cf/pull/2#issuecomment-626122011
-func FetchTests(group, contest, contClass, problem string, link url.URL) ([][]string, [][]string, error) {
+func FetchTests(contest, problem string, link url.URL) ([][]string, [][]string, error) {
 
 	c := cfg.Session.Client
 	if problem == "" {

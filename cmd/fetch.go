@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 // RunFetch is called on running cf fetch
@@ -19,7 +20,7 @@ func (opt Opts) RunFetch() {
 	}
 	// fetch countdown info
 	pkg.Log.Info("Fetching details of " + opt.contClass + " " + opt.contest)
-	dur, err := cln.FindCountdown(opt.group, opt.contest, opt.contClass, opt.link)
+	dur, err := cln.FindCountdown(opt.contest, opt.link)
 	pkg.PrintError(err, "Extraction of countdown failed")
 
 	// contest not yet started
@@ -27,18 +28,18 @@ func (opt Opts) RunFetch() {
 	if dur > 0 {
 		pkg.Log.Warning("Contest hasn't started")
 		pkg.Log.Info("Launching countdown to start")
-		cln.StartCountdown(dur)
+		startCountdown(dur)
 		// open problems page (once parsing is over)
 		// page will be opened only for live rounds
 		defer opt.RunOpen()
 	}
 	// Fetch ALL problems from contest page
 	pkg.Log.Info("Fetching problems...")
-	probs, err := cln.FetchProbs(opt.group, opt.contest, opt.contClass, opt.link)
+	probs, err := cln.FetchProbs(opt.contest, opt.link)
 	pkg.PrintError(err, "Extraction of contest problems failed")
 
 	// Fetch all tests from problems page
-	splInp, splOut, err := cln.FetchTests(opt.group, opt.contest, opt.contClass, "", opt.link)
+	splInp, splOut, err := cln.FetchTests(opt.contest, "", opt.link)
 	pkg.PrintError(err, "Failed to extract sample tests")
 	// no sample tests found, try parsing from each problem
 	if len(splInp) == 0 {
@@ -54,8 +55,7 @@ func (opt Opts) RunFetch() {
 				splOut = append(splOut, make([]string, 0))
 				continue
 			}
-			probInp, probOut, err := cln.FetchTests(opt.group,
-				opt.contest, opt.contClass, prob, opt.link)
+			probInp, probOut, err := cln.FetchTests(opt.contest, prob, opt.link)
 			pkg.PrintError(err, "Failed to extract sample tests of "+prob)
 			// append sample tests to slice
 			splInp = append(splInp, probInp...)
@@ -102,5 +102,21 @@ func (opt Opts) RunFetch() {
 		}
 	}
 
+	return
+}
+
+// startCountdown starts countdown of dur seconds
+func startCountdown(dur int64) {
+	// run timer till it runs out
+	pkg.LiveUI.Start()
+	for ; dur > 0; dur-- {
+		h := fmt.Sprintf("%d:", dur/(60*60))
+		m := fmt.Sprintf("0%d:", (dur/60)%60)
+		s := fmt.Sprintf("0%d", dur%60)
+		pkg.LiveUI.Print(h + m[len(m)-3:] + s[len(s)-2:])
+		time.Sleep(time.Second)
+	}
+	// remove timer data from screen
+	pkg.LiveUI.Print()
 	return
 }
