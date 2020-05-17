@@ -79,8 +79,9 @@ func (opt Opts) watch() {
 
 		tbl := uitable.New()
 		tbl.Separator = " "
-		tbl.AddRow("Verdict:", sub.Verdict)
 
+		sub.Verdict = prettyVerdict(sub.Verdict)
+		tbl.AddRow("Verdict:", sub.Verdict)
 		if sub.Waiting == "false" {
 			tbl.AddRow("Memory:", sub.Memory)
 			tbl.AddRow("Time:", sub.Time)

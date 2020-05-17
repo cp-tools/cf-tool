@@ -241,6 +241,29 @@ func selTmpltConfig(tmplt []cfg.Template) (*cfg.Template, error) {
 	return &tmplt[idx], nil
 }
 
+// compress and return color coded verdict
+func prettyVerdict(verdict string) string {
+	// compress verdict to WA, TLE, MLE
+	verdict = strings.ReplaceAll(verdict, "Wrong answer", "WA")
+	verdict = strings.ReplaceAll(verdict, "Time limit exceeded", "TLE")
+	verdict = strings.ReplaceAll(verdict, "Memory limit exceeded", "MLE")
+
+	switch {
+	case strings.HasPrefix(verdict, "TLE"):
+		return pkg.Yellow.Sprint(verdict)
+	case strings.HasPrefix(verdict, "MLE"):
+		return pkg.Red.Sprint(verdict)
+	case strings.HasPrefix(verdict, "WA"):
+		return pkg.Red.Sprint(verdict)
+	case strings.HasPrefix(verdict, "Pretests passed"):
+		return pkg.Green.Sprint(verdict)
+	case strings.HasPrefix(verdict, "Accepted"):
+		return pkg.Green.Sprint(verdict)
+	default:
+		return verdict
+	}
+}
+
 /*
 Parsing structure of problems
 -----------------------------

@@ -90,6 +90,7 @@ func (opt Opts) RunWatch() {
 					break
 				}
 				// insert row into table
+				sub.Verdict = prettyVerdict(sub.Verdict)
 				tbl.AddRow(sub.ID, sub.When, sub.Name, sub.Lang, sub.Verdict, sub.Time, sub.Memory)
 				// update pending status
 				if sub.Waiting == "true" {
