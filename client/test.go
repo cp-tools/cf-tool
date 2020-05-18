@@ -51,11 +51,9 @@ func FindTests() ([]string, []string, error) {
 	// check for i/o count equality
 	// and existence of non-zero test files
 	if len(inp) != len(out) {
-		err := fmt.Errorf("Unequal number of input/output test files")
-		return nil, nil, err
+		return nil, nil, ErrUnequalSampleTests
 	} else if len(inp) == 0 {
-		err := fmt.Errorf("No test files found")
-		return nil, nil, err
+		return nil, nil, ErrSampleTestsNotExists
 	}
 	return inp, out, nil
 }

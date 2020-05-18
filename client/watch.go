@@ -5,7 +5,6 @@ import (
 	pkg "cf/packages"
 
 	"bytes"
-	"fmt"
 	"net/url"
 	"path"
 	"strings"
@@ -42,8 +41,7 @@ func WatchSubmissions(contest, query string, link url.URL) ([]Submission, error)
 		return nil, err
 	} else if len(body) == 0 {
 		// such page doesn't exist
-		err = fmt.Errorf("Contest %v doesn't exist", contest)
-		return nil, err
+		return nil, ErrContestNotExists
 	}
 	// to hold all submissions
 	var data []Submission
@@ -79,8 +77,7 @@ func WatchContest(contest string, link url.URL) ([]Problem, error) {
 		return nil, err
 	} else if len(body) == 0 {
 		// such page doesn't exist
-		err = fmt.Errorf("Contest %v doesn't exist", contest)
-		return nil, err
+		return nil, ErrContestNotExists
 	}
 	// to hold all problems in contest
 	var data []Problem

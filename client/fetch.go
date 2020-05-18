@@ -24,8 +24,7 @@ func FindCountdown(contest string, link url.URL) (int64, error) {
 		return 0, err
 	} else if len(body) == 0 {
 		// such page doesn't exist
-		err = fmt.Errorf("Contest %v doesn't exist", contest)
-		return 0, err
+		return 0, ErrContestNotExists
 	}
 
 	doc, _ := goquery.NewDocumentFromReader(bytes.NewReader(body))

@@ -24,8 +24,7 @@ func Submit(contest, problem, langID, file string, link url.URL) error {
 		return err
 	} else if len(body) == 0 {
 		// such page doesn't exist
-		err = fmt.Errorf("Contest %v doesn't exist", contest)
-		return err
+		return ErrContestNotExists
 	}
 
 	// read source file

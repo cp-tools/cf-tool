@@ -5,7 +5,6 @@ import (
 	pkg "cf/packages"
 
 	"encoding/hex"
-	"fmt"
 	"net/url"
 	"path"
 
@@ -84,8 +83,7 @@ func Relogin() (bool, error) {
 	// decode hex data of encrypted password
 	ciphertext, err := hex.DecodeString(cfg.Session.Passwd)
 	if err != nil {
-		err := fmt.Errorf("Failed to decode password")
-		return false, err
+		return false, ErrDecodePasswdFailed
 	}
 	usr := cfg.Session.Handle
 	dec := aes.NewAES256Decrypter(usr)
