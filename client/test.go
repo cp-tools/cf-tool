@@ -2,11 +2,9 @@ package cln
 
 import (
 	cfg "cf/config"
-	pkg "cf/packages"
 
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"math/big"
@@ -16,9 +14,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/fatih/color"
-	"github.com/gosuri/uitable"
 )
 
 // FindTests finds all returns all sample input/output
@@ -154,39 +149,4 @@ func Validator(out, ans string, igCase bool, exp int) (string, string) {
 	}
 	// return formatted strings
 	return f(out), f(ans)
-}
-
-// PrintDiff is run if outputs don't match
-// returns input data, and then the diff of => out vs ans
-func PrintDiff(inp, out, ans string) string {
-	// variable to hold diff output
-	var diff strings.Builder
-	headerfmt := pkg.Blue.Add(color.Underline).SprintfFunc()
-	// print input data
-	fmt.Fprintln(&diff, headerfmt("Input"))
-	fmt.Fprintln(&diff, inp)
-
-	// break output into lines
-	str1 := strings.Split(out, "\n")
-	str2 := strings.Split(ans, "\n")
-	// equalize string lengths
-	if len(str1) < len(str2) {
-		str1 = append(str1, make([]string, len(str2)-len(str1))...)
-	} else {
-		str2 = append(str2, make([]string, len(str1)-len(str2))...)
-	}
-
-	// print output diff data
-	tbl := uitable.New()
-	tbl.Separator = " | "
-
-	tbl.AddRow(headerfmt("Actual Output"), headerfmt("Expected Output"))
-	// iterate over every row of outputs
-	for i := 0; i < len(str1); i++ {
-		tbl.AddRow(str1[i], str2[i])
-	}
-	fmt.Fprintln(&diff, tbl)
-	fmt.Fprintln(&diff)
-
-	return diff.String()
 }

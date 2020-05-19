@@ -2,7 +2,6 @@ package cmd
 
 import (
 	cfg "cf/config"
-	pkg "cf/packages"
 
 	"fmt"
 	"net/url"
@@ -15,10 +14,57 @@ import (
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/fatih/color"
+	"github.com/k0kubun/go-ansi"
 )
 
 // Version of the current executable
 const Version = "1.1.0"
+
+// Global Variables for different UI formatting
+var (
+	writer = os.Stderr
+	Green  = color.New(color.FgGreen)
+	Blue   = color.New(color.FgBlue)
+	Red    = color.New(color.FgRed)
+	Yellow = color.New(color.FgYellow)
+
+	Log struct {
+		Success, Notice, Info, Error,
+		Warning func(text ...interface{})
+	}
+	// LiveUI to print live data to terminal
+	LiveUI struct {
+		count int
+		Start func()
+		Print func(text ...string)
+	}
+)
+
+func init() {
+	// Initialise colored text output
+	Log.Success = func(text ...interface{}) { Green.Fprintln(writer, text...) }
+	Log.Notice = func(text ...interface{}) { fmt.Fprintln(writer, text...) }
+	Log.Info = func(text ...interface{}) { Blue.Fprintln(writer, text...) }
+	Log.Error = func(text ...interface{}) { Red.Fprintln(writer, text...) }
+	Log.Warning = func(text ...interface{}) { Yellow.Fprintln(writer, text...) }
+
+	// Initialise Live rendering output
+	LiveUI.Start = func() { LiveUI.count = 0 }
+	LiveUI.Print = func(text ...string) {
+		// clear last count lines from terminal
+		for i := 0; i < LiveUI.count; i++ {
+			ansi.CursorPreviousLine(1)
+			ansi.EraseInLine(2)
+		}
+		// count number of lines in text
+		LiveUI.count = 1
+		for _, str := range text {
+			LiveUI.count += strings.Count(str, "\n")
+			fmt.Println(str)
+		}
+	}
+}
 
 type (
 	// Opts is struct docopt binds flag data to
@@ -216,7 +262,7 @@ func selSourceFile(files []string) (string, error) {
 		Message: "Source file:",
 		Options: files,
 	}, &file)
-	pkg.PrintError(err, "")
+	PrintError(err, "")
 	return file, nil
 }
 
@@ -237,7 +283,7 @@ func selTmpltConfig(tmplt []cfg.Template) (*cfg.Template, error) {
 		Message: "Template configuration:",
 		Options: cfg.ListTmplts(tmplt...),
 	}, &idx)
-	pkg.PrintError(err, "")
+	PrintError(err, "")
 	return &tmplt[idx], nil
 }
 
@@ -250,18 +296,41 @@ func prettyVerdict(verdict string) string {
 
 	switch {
 	case strings.HasPrefix(verdict, "TLE"):
-		return pkg.Yellow.Sprint(verdict)
+		return Yellow.Sprint(verdict)
 	case strings.HasPrefix(verdict, "MLE"):
-		return pkg.Red.Sprint(verdict)
+		return Red.Sprint(verdict)
 	case strings.HasPrefix(verdict, "WA"):
-		return pkg.Red.Sprint(verdict)
+		return Red.Sprint(verdict)
 	case strings.HasPrefix(verdict, "Pretests passed"):
-		return pkg.Green.Sprint(verdict)
+		return Green.Sprint(verdict)
 	case strings.HasPrefix(verdict, "Accepted"):
-		return pkg.Green.Sprint(verdict)
+		return Green.Sprint(verdict)
 	default:
 		return verdict
 	}
+}
+
+// PrintError outputs error (with custom message)
+// and exits the program execution (if err != nil)
+func PrintError(err error, desc string) {
+	if err != nil {
+		if desc != "" {
+			Log.Error(desc)
+		}
+		Log.Error(err.Error())
+		os.Exit(0)
+	}
+}
+
+// CreateFile copies data to dst (create if not exists)
+// Returns absolute path to destination file
+func CreateFile(data, dst string) string {
+	out, err := os.Create(dst)
+	PrintError(err, "File "+dst+" couldn't be created!")
+	defer out.Close()
+
+	out.WriteString(data)
+	return dst
 }
 
 /*

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	cfg "cf/config"
-	pkg "cf/packages"
 
 	"fmt"
 	"io/ioutil"
@@ -17,7 +16,7 @@ import (
 func (opt Opts) RunGen() {
 	// check if any templates exist
 	if len(cfg.Templates) == 0 {
-		pkg.Log.Error("No configured template's exist")
+		Log.Error("No configured template's exist")
 		return
 	}
 	// index of template config to use
@@ -30,7 +29,7 @@ func (opt Opts) RunGen() {
 			Message: "Select template to generate:",
 			Options: cfg.ListTmplts(cfg.Templates...),
 		}, &idx)
-		pkg.PrintError(err, "")
+		PrintError(err, "")
 	}
 	// create template in current folder
 	// leaving path to "" creates file in curr directory
@@ -42,7 +41,7 @@ func (opt Opts) RunGen() {
 func (opt Opts) GenCode(t *cfg.Template, path string) {
 	// read template code file
 	file, err := ioutil.ReadFile(t.Path)
-	pkg.PrintError(err, "Failed to read template file")
+	PrintError(err, "Failed to read template file")
 	// clean template code (replace placeholders)
 	e := Env{
 		Contest:   opt.contest,
@@ -62,11 +61,11 @@ func (opt Opts) GenCode(t *cfg.Template, path string) {
 
 		// check if file already exists
 		if _, err := os.Stat(filepath.Join(path, name)); os.IsNotExist(err) {
-			pkg.CreateFile(source, filepath.Join(path, name))
-			pkg.Log.Notice("File " + name + " generated")
+			CreateFile(source, filepath.Join(path, name))
+			Log.Notice("File " + name + " generated")
 			break
 		}
-		pkg.Log.Warning("File " + name + " exists")
+		Log.Warning("File " + name + " exists")
 	}
 	return
 }

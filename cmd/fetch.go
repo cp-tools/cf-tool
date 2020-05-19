@@ -3,7 +3,6 @@ package cmd
 import (
 	cln "cf/client"
 	cfg "cf/config"
-	pkg "cf/packages"
 
 	"fmt"
 	"os"
@@ -15,37 +14,37 @@ import (
 func (opt Opts) RunFetch() {
 	// check if contest id is present
 	if opt.contest == "" {
-		pkg.Log.Error("No contest id found")
+		Log.Error("No contest id found")
 		return
 	}
 	// fetch countdown info
-	pkg.Log.Info("Fetching details of " + opt.contClass + " " + opt.contest)
+	Log.Info("Fetching details of " + opt.contClass + " " + opt.contest)
 	dur, err := cln.FindCountdown(opt.contest, opt.link)
-	pkg.PrintError(err, "Extraction of countdown failed")
+	PrintError(err, "Extraction of countdown failed")
 
 	// contest not yet started
 	// countdown till it starts
 	if dur > 0 {
-		pkg.Log.Warning("Contest hasn't started")
-		pkg.Log.Info("Launching countdown to start")
+		Log.Warning("Contest hasn't started")
+		Log.Info("Launching countdown to start")
 		startCountdown(dur)
 		// open problems page (once parsing is over)
 		// page will be opened only for live rounds
 		defer opt.RunOpen()
 	}
 	// Fetch ALL problems from contest page
-	pkg.Log.Info("Fetching problems...")
+	Log.Info("Fetching problems...")
 	probs, err := cln.FetchProbs(opt.contest, opt.link)
-	pkg.PrintError(err, "Extraction of contest problems failed")
+	PrintError(err, "Extraction of contest problems failed")
 
 	// Fetch all tests from problems page
 	splInp, splOut, err := cln.FetchTests(opt.contest, "", opt.link)
-	pkg.PrintError(err, "Failed to extract sample tests")
+	PrintError(err, "Failed to extract sample tests")
 	// no sample tests found, try parsing from each problem
 	if len(splInp) == 0 {
-		pkg.Log.Warning("Failed to fetch tests from problems page")
-		pkg.Log.Info("Fetching from page of every problem")
-		pkg.Log.Notice("Please be patient")
+		Log.Warning("Failed to fetch tests from problems page")
+		Log.Info("Fetching from page of every problem")
+		Log.Notice("Please be patient")
 		// iterate over all present problems
 		for _, prob := range probs {
 			// Problem isn't specified to be fetched
@@ -56,13 +55,13 @@ func (opt Opts) RunFetch() {
 				continue
 			}
 			probInp, probOut, err := cln.FetchTests(opt.contest, prob, opt.link)
-			pkg.PrintError(err, "Failed to extract sample tests of "+prob)
+			PrintError(err, "Failed to extract sample tests of "+prob)
 			// append sample tests to slice
 			splInp = append(splInp, probInp...)
 			splOut = append(splOut, probOut...)
 			// if problem is pdf format (can't extract tests)
 			if len(probInp) == 0 {
-				pkg.Log.Warning("Unable to extract test(s) - " + prob)
+				Log.Warning("Unable to extract test(s) - " + prob)
 				splInp = append(splInp, make([]string, 0))
 				splOut = append(splOut, make([]string, 0))
 			}
@@ -86,11 +85,11 @@ func (opt Opts) RunFetch() {
 		// create tests
 		for x := 0; x < len(splInp[i]); x++ {
 			// create input file (form x.in)
-			pkg.CreateFile(splInp[i][x], fmt.Sprintf("%v/%d.in", path, x))
+			CreateFile(splInp[i][x], fmt.Sprintf("%v/%d.in", path, x))
 			// create output file (form x.ans)
-			pkg.CreateFile(splOut[i][x], fmt.Sprintf("%v/%d.out", path, x))
+			CreateFile(splOut[i][x], fmt.Sprintf("%v/%d.out", path, x))
 		}
-		pkg.Log.Success(fmt.Sprintf("Fetched %d test(s) - %v", len(splInp[i]), prob))
+		Log.Success(fmt.Sprintf("Fetched %d test(s) - %v", len(splInp[i]), prob))
 		// generate code files if specified
 		idx := cfg.Settings.DfltTmplt
 		if cfg.Settings.GenOnFetch == true && idx != -1 {
@@ -108,15 +107,15 @@ func (opt Opts) RunFetch() {
 // startCountdown starts countdown of dur seconds
 func startCountdown(dur int64) {
 	// run timer till it runs out
-	pkg.LiveUI.Start()
+	LiveUI.Start()
 	for ; dur > 0; dur-- {
 		h := fmt.Sprintf("%d:", dur/(60*60))
 		m := fmt.Sprintf("0%d:", (dur/60)%60)
 		s := fmt.Sprintf("0%d", dur%60)
-		pkg.LiveUI.Print(h + m[len(m)-3:] + s[len(s)-2:])
+		LiveUI.Print(h + m[len(m)-3:] + s[len(s)-2:])
 		time.Sleep(time.Second)
 	}
 	// remove timer data from screen
-	pkg.LiveUI.Print()
+	LiveUI.Print()
 	return
 }

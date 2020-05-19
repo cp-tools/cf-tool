@@ -52,14 +52,14 @@ func WatchSubmissions(contest, query string, link url.URL) ([]Submission, error)
 	sel.Each(func(_ int, row *goquery.Selection) {
 		// select cell ...type(x) from row
 		data = append(data, Submission{
-			ID:      pkg.GetText(row, "td:nth-of-type(1)"),
-			When:    pkg.GetText(row, "td:nth-of-type(2)"),
-			Name:    pkg.GetText(row, "td:nth-of-type(4)"),
-			Lang:    pkg.GetText(row, "td:nth-of-type(5)"),
-			Waiting: pkg.GetAttr(row, "td:nth-of-type(6)", "waiting"),
-			Verdict: pkg.GetText(row, "td:nth-of-type(6)"),
-			Time:    pkg.GetText(row, "td:nth-of-type(7)"),
-			Memory:  pkg.GetText(row, "td:nth-of-type(8)"),
+			ID:      GetText(row, "td:nth-of-type(1)"),
+			When:    GetText(row, "td:nth-of-type(2)"),
+			Name:    GetText(row, "td:nth-of-type(4)"),
+			Lang:    GetText(row, "td:nth-of-type(5)"),
+			Waiting: GetAttr(row, "td:nth-of-type(6)", "waiting"),
+			Verdict: GetText(row, "td:nth-of-type(6)"),
+			Time:    GetText(row, "td:nth-of-type(7)"),
+			Memory:  GetText(row, "td:nth-of-type(8)"),
 		})
 	})
 
@@ -86,9 +86,9 @@ func WatchContest(contest string, link url.URL) ([]Problem, error) {
 	doc.Find(".problems tr").Has("td").Each(func(_ int, row *goquery.Selection) {
 
 		data = append(data, Problem{
-			ID:     pkg.GetText(row, "td:nth-of-type(1)"),
-			Name:   pkg.GetText(row, "td:nth-of-type(2) a"),
-			Count:  pkg.GetText(row, "td:nth-of-type(4)"),
+			ID:     GetText(row, "td:nth-of-type(1)"),
+			Name:   GetText(row, "td:nth-of-type(2) a"),
+			Count:  GetText(row, "td:nth-of-type(4)"),
 			Status: row.AttrOr("class", ""),
 		})
 	})

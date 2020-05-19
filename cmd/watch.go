@@ -2,7 +2,6 @@ package cmd
 
 import (
 	cln "cf/client"
-	pkg "cf/packages"
 
 	"fmt"
 	"strings"
@@ -16,11 +15,11 @@ import (
 func (opt Opts) RunWatch() {
 	// check if contest id is present
 	if opt.contest == "" {
-		pkg.Log.Error("No contest id found")
+		Log.Error("No contest id found")
 		return
 	}
 	// header formatting for table
-	headerfmt := pkg.Blue.Add(color.Underline).SprintfFunc()
+	headerfmt := Blue.Add(color.Underline).SprintfFunc()
 
 	if opt.SubCnt == 0 {
 		// submissions aren't specified to be parsed
@@ -28,7 +27,7 @@ func (opt Opts) RunWatch() {
 
 		// fetch contest solve status
 		data, err := cln.WatchContest(opt.contest, opt.link)
-		pkg.PrintError(err, "Failed to extract contest solve status")
+		PrintError(err, "Failed to extract contest solve status")
 
 		// init table with header + color
 		tbl := uitable.New()
@@ -53,9 +52,9 @@ func (opt Opts) RunWatch() {
 			clean := func(status string) string {
 				switch status {
 				case "accepted-problem":
-					return pkg.Green.Sprint("AC")
+					return Green.Sprint("AC")
 				case "rejected-problem":
-					return pkg.Red.Sprint("RE")
+					return Red.Sprint("RE")
 				default:
 					return "NA"
 				}
@@ -67,13 +66,13 @@ func (opt Opts) RunWatch() {
 
 	} else {
 		// infinite loop till verdicts declared
-		pkg.LiveUI.Start()
+		LiveUI.Start()
 		for {
 			// timer to fetch data in interval of 1 second
 			start := time.Now()
 			// fetch contest submission status
 			data, err := cln.WatchSubmissions(opt.contest, opt.problem, opt.link)
-			pkg.PrintError(err, "Failed to extract submissions in contest")
+			PrintError(err, "Failed to extract submissions in contest")
 
 			// create new table
 			tbl := uitable.New()
@@ -97,7 +96,7 @@ func (opt Opts) RunWatch() {
 					isPending = true
 				}
 			}
-			pkg.LiveUI.Print(tbl.String())
+			LiveUI.Print(tbl.String())
 
 			if isPending == false {
 				break

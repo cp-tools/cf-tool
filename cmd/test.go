@@ -3,21 +3,24 @@ package cmd
 import (
 	cln "cf/client"
 	cfg "cf/config"
-	pkg "cf/packages"
+	"fmt"
 
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/fatih/color"
+	"github.com/gosuri/uitable"
 )
 
 // RunTest is called on running `cf test`
 func (opt Opts) RunTest() {
 	// find code file to test
 	file, err := selSourceFile(cln.FindSourceFiles(opt.File))
-	pkg.PrintError(err, "Failed to select source file")
+	PrintError(err, "Failed to select source file")
 	// find template configs to use
 	t, err := selTmpltConfig(cln.FindTmpltsConfig(file))
-	pkg.PrintError(err, "Failed to select template configuration")
+	PrintError(err, "Failed to select template configuration")
 
 	// main testing starts here!!
 	e := Env{
@@ -32,10 +35,10 @@ func (opt Opts) RunTest() {
 	if t.PreScript != "" {
 		// replace placeholders in script
 		script := e.ReplPlaceholder(t.PreScript)
-		pkg.Log.Notice(script)
+		Log.Notice(script)
 		// run script with timer of 20 secs
 		_, _, err := cln.ExecScript(script, "", 1e9)
-		pkg.PrintError(err, "")
+		PrintError(err, "")
 	}
 
 	if opt.Custom == false {
@@ -50,10 +53,10 @@ func (opt Opts) RunTest() {
 	if t.PostScript != "" {
 		// replace placeholders in script
 		script := e.ReplPlaceholder(t.PostScript)
-		pkg.Log.Notice(script)
+		Log.Notice(script)
 		// run script with timer of 20 secs
 		_, _, err := cln.ExecScript(script, "", 1e9)
-		pkg.PrintError(err, "")
+		PrintError(err, "")
 	}
 	return
 }
@@ -63,7 +66,7 @@ func (opt Opts) RunTest() {
 func (opt Opts) tradJudge(t cfg.Template, e Env) {
 	// fetch test cases from current directory
 	inp, out, err := cln.FindTests()
-	pkg.PrintError(err, "Failed to parse sample tests")
+	PrintError(err, "Failed to parse sample tests")
 
 	// run judge for each test file
 	for i := 0; i < len(inp); i++ {
@@ -76,21 +79,21 @@ func (opt Opts) tradJudge(t cfg.Template, e Env) {
 		switch {
 		case elapsed.Seconds() >= float64(opt.Tl):
 			// print TLE message (add support for custom time limit)
-			pkg.Yellow.Printf("#%d: TLE .... %v\n", i, elapsed.String())
+			Yellow.Printf("#%d: TLE .... %v\n", i, elapsed.String())
 
 		case err != nil:
 			// print RTE message with error data
-			pkg.Red.Printf("#%d: RTE .... %v\n", i, err.Error())
+			Red.Printf("#%d: RTE .... %v\n", i, err.Error())
 
 		case stdout != out[i]:
 			// print WA message and diff output
-			pkg.Red.Printf("#%d: WA .... %v\n", i, elapsed.String())
-			diff := cln.PrintDiff(inp[i], stdout, out[i])
-			pkg.Log.Info(diff)
+			Red.Printf("#%d: WA .... %v\n", i, elapsed.String())
+			diff := printDiff(inp[i], stdout, out[i])
+			Log.Info(diff)
 
 		default:
 			// print AC message
-			pkg.Green.Printf("#%d: AC .... %v\n", i, elapsed.String())
+			Green.Printf("#%d: AC .... %v\n", i, elapsed.String())
 		}
 	}
 	return
@@ -114,9 +117,44 @@ func (opt Opts) spclJudge(t cfg.Template, e Env) {
 	*/
 
 	// inform user that interactive judge has started
-	pkg.Log.Success("-----Judge begins-----\n")
+	Log.Success("-----Judge begins-----\n")
 	cmd.Run()
-	pkg.Log.Success("\n-----Judge closed-----")
+	Log.Success("\n-----Judge closed-----")
 
 	return
+}
+
+// printDiff is run if outputs don't match
+// returns input data, and then the diff of => out vs ans
+func printDiff(inp, out, ans string) string {
+	// variable to hold diff output
+	var diff strings.Builder
+	headerfmt := Blue.Add(color.Underline).SprintfFunc()
+	// print input data
+	fmt.Fprintln(&diff, headerfmt("Input"))
+	fmt.Fprintln(&diff, inp)
+
+	// break output into lines
+	str1 := strings.Split(out, "\n")
+	str2 := strings.Split(ans, "\n")
+	// equalize string lengths
+	if len(str1) < len(str2) {
+		str1 = append(str1, make([]string, len(str2)-len(str1))...)
+	} else {
+		str2 = append(str2, make([]string, len(str1)-len(str2))...)
+	}
+
+	// print output diff data
+	tbl := uitable.New()
+	tbl.Separator = " | "
+
+	tbl.AddRow(headerfmt("Actual Output"), headerfmt("Expected Output"))
+	// iterate over every row of outputs
+	for i := 0; i < len(str1); i++ {
+		tbl.AddRow(str1[i], str2[i])
+	}
+	fmt.Fprintln(&diff, tbl)
+	fmt.Fprintln(&diff)
+
+	return diff.String()
 }

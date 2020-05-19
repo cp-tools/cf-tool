@@ -1,6 +1,11 @@
 package cln
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/PuerkitoBio/goquery"
+)
 
 // Some global variables
 var (
@@ -113,3 +118,15 @@ var (
 		"":                      ".txt",
 	}
 )
+
+// GetText extracts text from particular html data
+func GetText(sel *goquery.Selection, query string) string {
+	str := sel.Find(query).Text()
+	return strings.TrimSpace(str)
+}
+
+// GetAttr extracts attribute valur of particular html data
+func GetAttr(sel *goquery.Selection, query, attr string) string {
+	str := sel.Find(query).AttrOr(attr, "")
+	return strings.TrimSpace(str)
+}
