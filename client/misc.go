@@ -128,8 +128,8 @@ func parseBody(resp *http.Response) ([]byte, error) {
 	return ioutil.ReadAll(resp.Body)
 }
 
-// GetReqBody executes a GET request to url and returns the request body
-func GetReqBody(client *http.Client, url string) ([]byte, error) {
+// getReqBody executes a GET request to url and returns the request body
+func getReqBody(client *http.Client, url string) ([]byte, error) {
 	resp, err := client.Get(url)
 	if err != nil {
 		return nil, err
@@ -137,8 +137,8 @@ func GetReqBody(client *http.Client, url string) ([]byte, error) {
 	return parseBody(resp)
 }
 
-// PostReqBody executes a POST request (with values: data) to url and returns the request body
-func PostReqBody(client *http.Client, url string, data url.Values) ([]byte, error) {
+// postReqBody executes a POST request (with values: data) to url and returns the request body
+func postReqBody(client *http.Client, url string, data url.Values) ([]byte, error) {
 	resp, err := client.PostForm(url, data)
 	if err != nil {
 		return nil, err
@@ -146,33 +146,33 @@ func PostReqBody(client *http.Client, url string, data url.Values) ([]byte, erro
 	return parseBody(resp)
 }
 
-// FindHandle scrapes handle from REQUEST body
-func FindHandle(body []byte) string {
+// findHandle scrapes handle from REQUEST body
+func findHandle(body []byte) string {
 	doc, _ := goquery.NewDocumentFromReader(bytes.NewReader(body))
 	val := doc.Find("#header").Find("a[href^=\"/profile/\"]").Text()
 	return val
 }
 
-// FindCsrf extracts Csrf from REQUEST body
-func FindCsrf(body []byte) string {
+// findCsrf extracts Csrf from REQUEST body
+func findCsrf(body []byte) string {
 	doc, _ := goquery.NewDocumentFromReader(bytes.NewReader(body))
 	val, _ := doc.Find(".csrf-token").Attr("data-csrf")
 	return val
 }
 
-// RedirectCheck prevents redirection and returns requested page info
-func RedirectCheck(req *http.Request, via []*http.Request) error {
+// redirectCheck prevents redirection and returns requested page info
+func redirectCheck(req *http.Request, via []*http.Request) error {
 	return http.ErrUseLastResponse
 }
 
-// GetText extracts text from particular html data
-func GetText(sel *goquery.Selection, query string) string {
+// getText extracts text from particular html data
+func getText(sel *goquery.Selection, query string) string {
 	str := sel.Find(query).Text()
 	return strings.TrimSpace(str)
 }
 
-// GetAttr extracts attribute valur of particular html data
-func GetAttr(sel *goquery.Selection, query, attr string) string {
+// getAttr extracts attribute valur of particular html data
+func getAttr(sel *goquery.Selection, query, attr string) string {
 	str := sel.Find(query).AttrOr(attr, "")
 	return strings.TrimSpace(str)
 }

@@ -32,10 +32,10 @@ type (
 func WatchSubmissions(contest, query string, link url.URL) ([]Submission, error) {
 	// This implementation contains redirection prevention
 	c := cfg.Session.Client
-	c.CheckRedirect = RedirectCheck
+	c.CheckRedirect = redirectCheck
 	// fetch all submissions in contest
 	link.Path = path.Join(link.Path, "my")
-	body, err := GetReqBody(&c, link.String())
+	body, err := getReqBody(&c, link.String())
 	if err != nil {
 		return nil, err
 	} else if len(body) == 0 {
@@ -51,14 +51,14 @@ func WatchSubmissions(contest, query string, link url.URL) ([]Submission, error)
 	sel.Each(func(_ int, row *goquery.Selection) {
 		// select cell ...type(x) from row
 		data = append(data, Submission{
-			ID:      GetText(row, "td:nth-of-type(1)"),
-			When:    GetText(row, "td:nth-of-type(2)"),
-			Name:    GetText(row, "td:nth-of-type(4)"),
-			Lang:    GetText(row, "td:nth-of-type(5)"),
-			Waiting: GetAttr(row, "td:nth-of-type(6)", "waiting"),
-			Verdict: GetText(row, "td:nth-of-type(6)"),
-			Time:    GetText(row, "td:nth-of-type(7)"),
-			Memory:  GetText(row, "td:nth-of-type(8)"),
+			ID:      getText(row, "td:nth-of-type(1)"),
+			When:    getText(row, "td:nth-of-type(2)"),
+			Name:    getText(row, "td:nth-of-type(4)"),
+			Lang:    getText(row, "td:nth-of-type(5)"),
+			Waiting: getAttr(row, "td:nth-of-type(6)", "waiting"),
+			Verdict: getText(row, "td:nth-of-type(6)"),
+			Time:    getText(row, "td:nth-of-type(7)"),
+			Memory:  getText(row, "td:nth-of-type(8)"),
 		})
 	})
 
@@ -69,9 +69,9 @@ func WatchSubmissions(contest, query string, link url.URL) ([]Submission, error)
 func WatchContest(contest string, link url.URL) ([]Problem, error) {
 	// This implementation contains redirection prevention
 	c := cfg.Session.Client
-	c.CheckRedirect = RedirectCheck
+	c.CheckRedirect = redirectCheck
 	// fetch contest dashboard page
-	body, err := GetReqBody(&c, link.String())
+	body, err := getReqBody(&c, link.String())
 	if err != nil {
 		return nil, err
 	} else if len(body) == 0 {
@@ -85,9 +85,9 @@ func WatchContest(contest string, link url.URL) ([]Problem, error) {
 	doc.Find(".problems tr").Has("td").Each(func(_ int, row *goquery.Selection) {
 
 		data = append(data, Problem{
-			ID:     GetText(row, "td:nth-of-type(1)"),
-			Name:   GetText(row, "td:nth-of-type(2) a"),
-			Count:  GetText(row, "td:nth-of-type(4)"),
+			ID:     getText(row, "td:nth-of-type(1)"),
+			Name:   getText(row, "td:nth-of-type(2) a"),
+			Count:  getText(row, "td:nth-of-type(4)"),
 			Status: row.AttrOr("class", ""),
 		})
 	})

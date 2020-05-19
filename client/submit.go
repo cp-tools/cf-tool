@@ -12,13 +12,19 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-// Submit uploads form data and submits user code
+/*
+Submit reads contents of file and submits it to
+specified problem in contest. Returns nil is submission was successful.
+
+If submission fails (includes failure due to submission of same code)
+returns error message of cause of failed submission.
+*/
 func Submit(contest, problem, langID, file string, link url.URL) error {
 	// form redirection prevention is removed while submitting
 	c := cfg.Session.Client
-	c.CheckRedirect = RedirectCheck
+	c.CheckRedirect = redirectCheck
 	link.Path = path.Join(link.Path, "submit")
-	body, err := GetReqBody(&c, link.String())
+	body, err := getReqBody(&c, link.String())
 	if err != nil {
 		return err
 	} else if len(body) == 0 {
@@ -29,12 +35,12 @@ func Submit(contest, problem, langID, file string, link url.URL) error {
 	// read source file
 	data, _ := ioutil.ReadFile(file)
 	// hidden form data
-	csrf := FindCsrf(body)
+	csrf := findCsrf(body)
 	ftaa := "yzo0kk4bhlbaw83g2q"
 	bfaa := "883b704dbe5c70e1e61de4d8aff2da32"
 	// post form data (remove redirection prevention)
 	c.CheckRedirect = nil
-	body, err = PostReqBody(&c, link.String(), url.Values{
+	body, err = postReqBody(&c, link.String(), url.Values{
 		"csrf_token":            {csrf},
 		"ftaa":                  {ftaa},
 		"bfaa":                  {bfaa},

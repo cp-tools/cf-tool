@@ -23,7 +23,17 @@ type (
 	}
 )
 
-// FetchSubs pulls submissions matching criteria
+/*
+FetchSubs pulls submission information of each submission
+of handle matching contest and problem parameters passed.
+
+Set contest param to non-empty to filter submissions of particular contest.
+Similarly, setting problem param to non-empty filters problems matching criteria.
+
+Returns slice of struct `Sub` holding details of filtered submissions.
+
+Returns error is http request fails or API returns non-OK status.
+*/
 func FetchSubs(contest, problem, handle string) ([]Sub, error) {
 
 	c := cfg.Session.Client
@@ -34,7 +44,7 @@ func FetchSubs(contest, problem, handle string) ([]Sub, error) {
 	q.Set("handle", handle)
 	link.RawQuery = q.Encode()
 
-	body, err := GetReqBody(&c, link.String())
+	body, err := getReqBody(&c, link.String())
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +55,7 @@ func FetchSubs(contest, problem, handle string) ([]Sub, error) {
 		comm := gjson.GetBytes(body, "comment").String()
 		return nil, fmt.Errorf(comm)
 	}
-	// is another submission to same problem considered
+	// is another AC submission to same problem considered
 	isParsed := make(map[string]bool)
 	var Subs []Sub
 
@@ -53,7 +63,6 @@ func FetchSubs(contest, problem, handle string) ([]Sub, error) {
 	// thanks to module tidwall/gjson for the awesome package
 	result := gjson.GetBytes(body, "result")
 	result.ForEach(func(key, value gjson.Result) bool {
-		// check if result matches search criteria
 		// extract submission data
 		contID := value.Get("problem.contestId").String()
 		probID := value.Get("problem.index").String()
@@ -64,7 +73,7 @@ func FetchSubs(contest, problem, handle string) ([]Sub, error) {
 		sid := value.Get("id").String()
 		// ContestId+ProblemId => 1234c2
 		query := contID + probID
-
+		// check if result matches search criteria
 		if (contID == contest || contest == "") && (probID == problem || problem == "") &&
 			(verdict == "OK" && isParsed[query] == false) {
 			// create sub and fetch source code
@@ -85,7 +94,12 @@ func FetchSubs(contest, problem, handle string) ([]Sub, error) {
 	return Subs, nil
 }
 
-// FetchSubSource fetches submission code of Sub
+/*
+FetchSubSource extracts source code of particular submission
+returns a string containing the source code of the submission.
+
+If fetching submission fails, http error message is returned.
+*/
 func (sub *Sub) FetchSubSource() (string, error) {
 	// determine contest type (contest/gym)
 	contClass := "contest"
@@ -96,7 +110,7 @@ func (sub *Sub) FetchSubSource() (string, error) {
 	c := cfg.Session.Client
 	link, _ := url.Parse(cfg.Settings.Host)
 	link.Path = path.Join(link.Path, contClass, sub.Contest, "submission", sub.Sid)
-	body, err := GetReqBody(&c, link.String())
+	body, err := getReqBody(&c, link.String())
 	if err != nil {
 		return "", err
 	}

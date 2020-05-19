@@ -19,7 +19,7 @@ import (
 func FetchLatest(owner, repo string) (semver.Version, string, error) {
 	// url link of github API to fetch latest version data from
 	link := fmt.Sprintf("https://api.github.com/repos/%v/%v/releases/latest", owner, repo)
-	resp, err := GetReqBody(http.DefaultClient, link)
+	resp, err := getReqBody(http.DefaultClient, link)
 	if err != nil {
 		return semver.Version{}, "", err
 	}
