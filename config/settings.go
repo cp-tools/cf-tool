@@ -23,7 +23,7 @@ func init() {
 	// initialise default values of Settings struct
 	Settings.DfltTmplt = -1
 	Settings.GenOnFetch = false
-	Settings.Host = "https://codeforces/com"
+	Settings.Host = "https://codeforces.com"
 	Settings.Proxy = ""
 	Settings.WSName = "codeforces"
 }
