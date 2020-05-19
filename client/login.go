@@ -2,7 +2,6 @@ package cln
 
 import (
 	cfg "cf/config"
-	pkg "cf/packages"
 
 	"encoding/hex"
 	"net/url"
@@ -22,18 +21,18 @@ func Login(usr, passwd string) (bool, error) {
 
 	link, _ := url.Parse(cfg.Settings.Host)
 	link.Path = path.Join(link.Path, "enter")
-	body, err := pkg.GetReqBody(&c, link.String())
+	body, err := GetReqBody(&c, link.String())
 	if err != nil {
 		return false, err
 	}
 
 	// Hidden form data
-	csrf := pkg.FindCsrf(body)
+	csrf := FindCsrf(body)
 	ftaa := "yzo0kk4bhlbaw83g2q"
 	bfaa := "883b704dbe5c70e1e61de4d8aff2da32"
 
 	// Post form (aka login using creds)
-	body, err = pkg.PostReqBody(&c, link.String(), url.Values{
+	body, err = PostReqBody(&c, link.String(), url.Values{
 		"csrf_token":    {csrf},
 		"action":        {"enter"},
 		"ftaa":          {ftaa},
@@ -47,7 +46,7 @@ func Login(usr, passwd string) (bool, error) {
 		return false, err
 	}
 
-	usr = pkg.FindHandle(body)
+	usr = FindHandle(body)
 	if usr != "" {
 		// create aes 256 encryption and encode as
 		// hex string and save to sessions.json
@@ -69,12 +68,12 @@ func LoggedInUsr() (string, error) {
 	// fetch home page and check if logged in
 	c := cfg.Session.Client
 	link, _ := url.Parse(cfg.Settings.Host)
-	body, err := pkg.GetReqBody(&c, link.String())
+	body, err := GetReqBody(&c, link.String())
 	if err != nil {
 		return "", err
 	}
 
-	return pkg.FindHandle(body), nil
+	return FindHandle(body), nil
 }
 
 // Relogin extracts handle/passwd from sessions.json

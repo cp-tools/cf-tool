@@ -3,17 +3,42 @@ package cln
 import (
 	"archive/tar"
 	"compress/gzip"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
+	"runtime"
+
+	"github.com/blang/semver"
+	"github.com/tidwall/gjson"
 )
+
+// FetchLatest determines latest version through API page of github
+func FetchLatest(owner, repo string) (semver.Version, string, error) {
+	// url link of github API to fetch latest version data from
+	link := fmt.Sprintf("https://api.github.com/repos/%v/%v/releases/latest", owner, repo)
+	resp, err := GetReqBody(http.DefaultClient, link)
+	if err != nil {
+		return semver.Version{}, "", err
+	}
+	// gjson is used in pull too. So being used again here!
+	latest := gjson.GetBytes(resp, "tag_name").String()
+	lVers, err := semver.ParseTolerant(latest)
+	releaseNotes := gjson.GetBytes(resp, "body").String()
+
+	return lVers, releaseNotes, err
+}
 
 // SelfUpgrade downloads latest release and overwrites current binary
 // Copied from https://github.com/yitsushi/totp-cli/blob/master/command/update.go
-func SelfUpgrade(url string) error {
-	resp, err := http.Get(url)
+func SelfUpgrade(owner, repo, vers string) error {
+	// compile link from passed parameters to fetch binary matching current build
+	link := fmt.Sprintf("https://github.com/%v/%v/releases/download/v%v/cf_%v_%v.tar.gz",
+		owner, repo, vers, runtime.GOOS, runtime.GOARCH)
+
+	resp, err := http.Get(link)
 	if err != nil {
 		return err
 	}

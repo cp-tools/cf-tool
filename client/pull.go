@@ -2,7 +2,6 @@ package cln
 
 import (
 	cfg "cf/config"
-	pkg "cf/packages"
 
 	"bytes"
 	"fmt"
@@ -35,7 +34,7 @@ func FetchSubs(contest, problem, handle string) ([]Sub, error) {
 	q.Set("handle", handle)
 	link.RawQuery = q.Encode()
 
-	body, err := pkg.GetReqBody(&c, link.String())
+	body, err := GetReqBody(&c, link.String())
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +96,7 @@ func (sub *Sub) FetchSubSource() (string, error) {
 	c := cfg.Session.Client
 	link, _ := url.Parse(cfg.Settings.Host)
 	link.Path = path.Join(link.Path, contClass, sub.Contest, "submission", sub.Sid)
-	body, err := pkg.GetReqBody(&c, link.String())
+	body, err := GetReqBody(&c, link.String())
 	if err != nil {
 		return "", err
 	}

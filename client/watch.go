@@ -2,7 +2,6 @@ package cln
 
 import (
 	cfg "cf/config"
-	pkg "cf/packages"
 
 	"bytes"
 	"net/url"
@@ -33,10 +32,10 @@ type (
 func WatchSubmissions(contest, query string, link url.URL) ([]Submission, error) {
 	// This implementation contains redirection prevention
 	c := cfg.Session.Client
-	c.CheckRedirect = pkg.RedirectCheck
+	c.CheckRedirect = RedirectCheck
 	// fetch all submissions in contest
 	link.Path = path.Join(link.Path, "my")
-	body, err := pkg.GetReqBody(&c, link.String())
+	body, err := GetReqBody(&c, link.String())
 	if err != nil {
 		return nil, err
 	} else if len(body) == 0 {
@@ -70,9 +69,9 @@ func WatchSubmissions(contest, query string, link url.URL) ([]Submission, error)
 func WatchContest(contest string, link url.URL) ([]Problem, error) {
 	// This implementation contains redirection prevention
 	c := cfg.Session.Client
-	c.CheckRedirect = pkg.RedirectCheck
+	c.CheckRedirect = RedirectCheck
 	// fetch contest dashboard page
-	body, err := pkg.GetReqBody(&c, link.String())
+	body, err := GetReqBody(&c, link.String())
 	if err != nil {
 		return nil, err
 	} else if len(body) == 0 {

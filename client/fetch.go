@@ -2,7 +2,6 @@ package cln
 
 import (
 	cfg "cf/config"
-	pkg "cf/packages"
 
 	"bytes"
 	"fmt"
@@ -17,9 +16,9 @@ import (
 func FindCountdown(contest string, link url.URL) (int64, error) {
 	// This implementation contains redirection prevention
 	c := cfg.Session.Client
-	c.CheckRedirect = pkg.RedirectCheck
+	c.CheckRedirect = RedirectCheck
 	link.Path = path.Join(link.Path, "countdown")
-	body, err := pkg.GetReqBody(&c, link.String())
+	body, err := GetReqBody(&c, link.String())
 	if err != nil {
 		return 0, err
 	} else if len(body) == 0 {
@@ -39,7 +38,7 @@ func FindCountdown(contest string, link url.URL) (int64, error) {
 func FetchProbs(contest string, link url.URL) ([]string, error) {
 	// no need of modifying link as it already points to dashboard
 	c := cfg.Session.Client
-	body, err := pkg.GetReqBody(&c, link.String())
+	body, err := GetReqBody(&c, link.String())
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +67,7 @@ func FetchTests(contest, problem string, link url.URL) ([][]string, [][]string, 
 		link.Path = path.Join(link.Path, "problem", problem)
 	}
 
-	body, err := pkg.GetReqBody(&c, link.String())
+	body, err := GetReqBody(&c, link.String())
 	if err != nil {
 		return nil, nil, err
 	}

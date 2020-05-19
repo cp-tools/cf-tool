@@ -2,7 +2,6 @@ package cln
 
 import (
 	cfg "cf/config"
-	pkg "cf/packages"
 
 	"bytes"
 	"fmt"
@@ -17,9 +16,9 @@ import (
 func Submit(contest, problem, langID, file string, link url.URL) error {
 	// form redirection prevention is removed while submitting
 	c := cfg.Session.Client
-	c.CheckRedirect = pkg.RedirectCheck
+	c.CheckRedirect = RedirectCheck
 	link.Path = path.Join(link.Path, "submit")
-	body, err := pkg.GetReqBody(&c, link.String())
+	body, err := GetReqBody(&c, link.String())
 	if err != nil {
 		return err
 	} else if len(body) == 0 {
@@ -30,12 +29,12 @@ func Submit(contest, problem, langID, file string, link url.URL) error {
 	// read source file
 	data, _ := ioutil.ReadFile(file)
 	// hidden form data
-	csrf := pkg.FindCsrf(body)
+	csrf := FindCsrf(body)
 	ftaa := "yzo0kk4bhlbaw83g2q"
 	bfaa := "883b704dbe5c70e1e61de4d8aff2da32"
 	// post form data (remove redirection prevention)
 	c.CheckRedirect = nil
-	body, err = pkg.PostReqBody(&c, link.String(), url.Values{
+	body, err = PostReqBody(&c, link.String(), url.Values{
 		"csrf_token":            {csrf},
 		"ftaa":                  {ftaa},
 		"bfaa":                  {bfaa},
