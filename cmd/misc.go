@@ -18,7 +18,7 @@ import (
 )
 
 // Version of the current executable
-const Version = "1.1.0"
+const Version = "1.1.1"
 
 type (
 	// Opts is struct docopt binds flag data to

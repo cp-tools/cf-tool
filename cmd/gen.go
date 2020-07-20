@@ -33,8 +33,8 @@ func (opt Opts) RunGen() {
 		pkg.PrintError(err, "")
 	}
 	// create template in current folder
-	// leaving path to "" creates file in curr directory
-	opt.GenCode(&cfg.Templates[idx], "")
+	currDir, _ := os.Getwd()
+	opt.GenCode(&cfg.Templates[idx], currDir)
 	return
 }
 
@@ -54,7 +54,8 @@ func (opt Opts) GenCode(t *cfg.Template, path string) {
 	source := e.ReplPlaceholder(string(file))
 
 	// name of file to be created
-	fName := fmt.Sprintf("${problem}${idx}%v", t.Ext)
+	currBase := filepath.Base(path)
+	fName := fmt.Sprintf("%v${idx}%v", currBase, t.Ext)
 	for idx := 0; ; idx++ {
 		// idx value to replace in string
 		e.Idx = strconv.Itoa(idx)
