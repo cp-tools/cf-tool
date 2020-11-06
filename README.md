@@ -16,7 +16,7 @@
     <a href="https://github.com/infixint943/cf/blob/master/LICENSE"><img src="https://img.shields.io/github/license/infixint943/cf?style=for-the-badge"></a>
 </h4>
 
-
+**Note: This project is now archived. Use the newer project: [cpt](https://github.com/cp-tools/cpt).**
 
 ![](assets/demo.gif)
 
