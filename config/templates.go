@@ -1,8 +1,6 @@
 package cfg
 
 import (
-	pkg "cf/packages"
-
 	"encoding/json"
 	"io/ioutil"
 	"os"
@@ -20,32 +18,40 @@ type Template struct {
 	PostScript string `json:"post_script"`
 }
 
-// Templates holds all configured templates of user
-var Templates []Template
-
-var tmpltPath string
+var (
+	// Templates holds all configured templates of user
+	Templates []Template
+	tmpltPath string
+)
 
 // InitTemplates reads data from templates.json
-func InitTemplates(path string) {
+func InitTemplates(path string) error {
 	// set templates.json file path
 	tmpltPath = path
 
-	file, err := ioutil.ReadFile(tmpltPath)
+	file, err := os.OpenFile(tmpltPath, os.O_RDWR|os.O_CREATE, 0666)
+	defer file.Close()
 	if err != nil {
-		pkg.Log.Warning("File templates.json doesn't exist")
-		pkg.Log.Info("Creating templates.json file...")
-		SaveTemplates()
+		return err
 	}
-	json.Unmarshal(file, &Templates)
+
+	body, _ := ioutil.ReadAll(file)
+	json.Unmarshal(body, &Templates)
+	return nil
+
 }
 
 // SaveTemplates to settings.json file
-func SaveTemplates() {
-	file, err := os.Create(tmpltPath)
-	pkg.PrintError(err, "Failed to create templates.json file")
+func SaveTemplates() error {
+	// create templates.json file
+	file, err := os.OpenFile(tmpltPath, os.O_TRUNC|os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
+		return err
+	}
 
 	body, _ := json.MarshalIndent(Templates, "", "\t")
 	file.Write(body)
+	return nil
 }
 
 // ListTmplts returns an array of required template aliases

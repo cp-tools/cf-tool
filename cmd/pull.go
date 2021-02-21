@@ -2,7 +2,6 @@ package cmd
 
 import (
 	cln "cf/client"
-	pkg "cf/packages"
 
 	"fmt"
 	"os"
@@ -18,16 +17,16 @@ import (
 // RunPull is called on running cf pull
 func (opt Opts) RunPull() {
 	// fetch all submissions matching criteria
-	pkg.Log.Success("Pulling submissions of: " + opt.Handle)
+	Log.Success("Pulling submissions of: " + opt.Handle)
 	// fetch all submissions matching criteria
 	subs, err := cln.FetchSubs(opt.contest, opt.problem, opt.Handle)
-	pkg.PrintError(err, "Failed to extract submission status")
+	PrintError(err, "Failed to extract submission status")
 
 	for _, sub := range subs {
 		// fetch source code
 		source, err := sub.FetchSubSource()
 		if err != nil {
-			pkg.Log.Error("Failed to pull source code:" + sub.Sid)
+			Log.Error("Failed to pull source code:" + sub.Sid)
 			continue
 		}
 
@@ -50,8 +49,8 @@ func (opt Opts) RunPull() {
 				cwd, _ := os.Getwd()
 				relPath := strings.TrimPrefix(filepath.Join(path, name), cwd)
 
-				pkg.CreateFile(source, filepath.Join(path, name))
-				pkg.Log.Success(fmt.Sprintf("Fetched %v %v to .%v",
+				CreateFile(source, filepath.Join(path, name))
+				Log.Success(fmt.Sprintf("Fetched %v %v to .%v",
 					sub.Contest, sub.Problem, relPath))
 				break
 			}

@@ -8,12 +8,12 @@
     <br />
     Don't forget to :star: the project if you liked it!
     <br /><br />
-    <a href="https://travis-ci.com/github/infixint943/cf"><img src="https://img.shields.io/travis/com/infixint943/cf?style=for-the-badge"></a>
-    <a href="https://github.com/infixint943/cf/commits/master"><img src="https://img.shields.io/github/last-commit/infixint943/cf?style=for-the-badge"></a>
-    <a href="https://github.com/infixint943/cf/releases"><img src="https://img.shields.io/github/v/release/infixint943/cf?style=for-the-badge"></a>
-    <a href="https://github.com/infixint943/cf/issues"><img src="https://img.shields.io/github/issues/infixint943/cf?style=for-the-badge"></a>
-    <a href=""><img src="https://img.shields.io/github/go-mod/go-version/infixint943/cf?style=for-the-badge"></a>
-    <a href="https://github.com/infixint943/cf/blob/master/LICENSE"><img src="https://img.shields.io/github/license/infixint943/cf?style=for-the-badge"></a>
+    <a href="https://travis-ci.com/github/cp-tools/cf"><img src="https://img.shields.io/travis/com/cp-tools/cf?style=for-the-badge"></a>
+    <a href="https://github.com/cp-tools/cf/commits/master"><img src="https://img.shields.io/github/last-commit/cp-tools/cf?style=for-the-badge"></a>
+    <a href="https://github.com/cp-tools/cf/releases"><img src="https://img.shields.io/github/v/release/cp-tools/cf?style=for-the-badge"></a>
+    <a href="https://github.com/cp-tools/cf/issues"><img src="https://img.shields.io/github/issues/cp-tools/cf?style=for-the-badge"></a>
+    <a href=""><img src="https://img.shields.io/github/go-mod/go-version/cp-tools/cf?style=for-the-badge"></a>
+    <a href="https://github.com/cp-tools/cf/blob/master/LICENSE"><img src="https://img.shields.io/github/license/cp-tools/cf?style=for-the-badge"></a>
 </h4>
 
 **Note: This project is now archived. Use the newer project: [cpt](https://github.com/cp-tools/cpt).**
@@ -37,20 +37,20 @@
 
 # Installation
 
-You may download the latest, compiled, binary files from [here](https://github.com/infixint943/cf/releases).
+You may download the latest, compiled, binary files from [here](https://github.com/cp-tools/cf/releases).
 Place the executable in system **PATH** to invoke the tool from any directory.
 
 Alternatively, you can also compile the tool from source.
 
 ```bash
-git clone https://github.com/infixint943/cf.git
+git clone https://github.com/cp-tools/cf.git
 cd cf/
 go build -ldflags "-s -w"
 ```
 
 # Quick Start
 
-**Note:** For detailed documentation, please head to the [wiki](https://github.com/infixint943/cf/wiki) page.
+**Note:** For detailed documentation, please head to the [wiki](https://github.com/cp-tools/cf/wiki) page.
 
 > Let's simulate participating in contest `4`. This tutorial assumes you have already configured your login details and added at least one template, through `cf config` 
 

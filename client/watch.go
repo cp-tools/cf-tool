@@ -2,10 +2,8 @@ package cln
 
 import (
 	cfg "cf/config"
-	pkg "cf/packages"
 
 	"bytes"
-	"fmt"
 	"net/url"
 	"path"
 	"strings"
@@ -34,16 +32,15 @@ type (
 func WatchSubmissions(contest, query string, link url.URL) ([]Submission, error) {
 	// This implementation contains redirection prevention
 	c := cfg.Session.Client
-	c.CheckRedirect = pkg.RedirectCheck
+	c.CheckRedirect = redirectCheck
 	// fetch all submissions in contest
 	link.Path = path.Join(link.Path, "my")
-	body, err := pkg.GetReqBody(&c, link.String())
+	body, err := getReqBody(&c, link.String())
 	if err != nil {
 		return nil, err
 	} else if len(body) == 0 {
 		// such page doesn't exist
-		err = fmt.Errorf("Contest %v doesn't exist", contest)
-		return nil, err
+		return nil, ErrContestNotExists
 	}
 	// to hold all submissions
 	var data []Submission
@@ -54,14 +51,14 @@ func WatchSubmissions(contest, query string, link url.URL) ([]Submission, error)
 	sel.Each(func(_ int, row *goquery.Selection) {
 		// select cell ...type(x) from row
 		data = append(data, Submission{
-			ID:      pkg.GetText(row, "td:nth-of-type(1)"),
-			When:    pkg.GetText(row, "td:nth-of-type(2)"),
-			Name:    pkg.GetText(row, "td:nth-of-type(4)"),
-			Lang:    pkg.GetText(row, "td:nth-of-type(5)"),
-			Waiting: pkg.GetAttr(row, "td:nth-of-type(6)", "waiting"),
-			Verdict: pkg.GetText(row, "td:nth-of-type(6)"),
-			Time:    pkg.GetText(row, "td:nth-of-type(7)"),
-			Memory:  pkg.GetText(row, "td:nth-of-type(8)"),
+			ID:      getText(row, "td:nth-of-type(1)"),
+			When:    getText(row, "td:nth-of-type(2)"),
+			Name:    getText(row, "td:nth-of-type(4)"),
+			Lang:    getText(row, "td:nth-of-type(5)"),
+			Waiting: getAttr(row, "td:nth-of-type(6)", "waiting"),
+			Verdict: getText(row, "td:nth-of-type(6)"),
+			Time:    getText(row, "td:nth-of-type(7)"),
+			Memory:  getText(row, "td:nth-of-type(8)"),
 		})
 	})
 
@@ -72,15 +69,14 @@ func WatchSubmissions(contest, query string, link url.URL) ([]Submission, error)
 func WatchContest(contest string, link url.URL) ([]Problem, error) {
 	// This implementation contains redirection prevention
 	c := cfg.Session.Client
-	c.CheckRedirect = pkg.RedirectCheck
+	c.CheckRedirect = redirectCheck
 	// fetch contest dashboard page
-	body, err := pkg.GetReqBody(&c, link.String())
+	body, err := getReqBody(&c, link.String())
 	if err != nil {
 		return nil, err
 	} else if len(body) == 0 {
 		// such page doesn't exist
-		err = fmt.Errorf("Contest %v doesn't exist", contest)
-		return nil, err
+		return nil, ErrContestNotExists
 	}
 	// to hold all problems in contest
 	var data []Problem
@@ -89,9 +85,9 @@ func WatchContest(contest string, link url.URL) ([]Problem, error) {
 	doc.Find(".problems tr").Has("td").Each(func(_ int, row *goquery.Selection) {
 
 		data = append(data, Problem{
-			ID:     pkg.GetText(row, "td:nth-of-type(1)"),
-			Name:   pkg.GetText(row, "td:nth-of-type(2) a"),
-			Count:  pkg.GetText(row, "td:nth-of-type(4)"),
+			ID:     getText(row, "td:nth-of-type(1)"),
+			Name:   getText(row, "td:nth-of-type(2) a"),
+			Count:  getText(row, "td:nth-of-type(4)"),
 			Status: row.AttrOr("class", ""),
 		})
 	})

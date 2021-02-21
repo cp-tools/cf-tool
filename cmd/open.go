@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	pkg "cf/packages"
-
 	"os/exec"
 	"path"
 	"runtime"
@@ -12,7 +10,7 @@ import (
 func (opt Opts) RunOpen() {
 	// check if contest id is present
 	if opt.contest == "" {
-		pkg.Log.Error("No contest id found")
+		Log.Error("No contest id found")
 		return
 	}
 	link := opt.link

@@ -3,7 +3,6 @@ package cmd
 import (
 	cln "cf/client"
 	cfg "cf/config"
-	pkg "cf/packages"
 
 	"fmt"
 	"net/url"
@@ -27,7 +26,7 @@ func (opt Opts) RunConfig() {
 			"Other misc preferences",
 		},
 	}, &choice, survey.WithValidator(survey.Required))
-	pkg.PrintError(err, "")
+	PrintError(err, "")
 
 	switch choice {
 	case 0:
@@ -45,8 +44,8 @@ func (opt Opts) RunConfig() {
 func login() {
 	// check if logged in user exists
 	if cfg.Session.Handle != "" {
-		pkg.Log.Success("Current user: " + cfg.Session.Handle)
-		pkg.Log.Warning("Current session will be overwritten")
+		Log.Success("Current user: " + cfg.Session.Handle)
+		Log.Warning("Current session will be overwritten")
 	}
 	// take input of username / password
 	creds := struct{ Usr, Passwd string }{}
@@ -61,19 +60,19 @@ func login() {
 			Validate: survey.Required,
 		},
 	}, &creds)
-	pkg.PrintError(err, "")
+	PrintError(err, "")
 	// login and check login status
-	pkg.Log.Info("Logging in")
+	Log.Info("Logging in")
 	flag, err := cln.Login(creds.Usr, creds.Passwd)
-	pkg.PrintError(err, "Login failed")
+	PrintError(err, "Login failed")
 	// login was successful
 	if flag == true {
-		pkg.Log.Success("Login successful")
-		pkg.Log.Notice("Welcome " + cfg.Session.Handle)
+		Log.Success("Login successful")
+		Log.Notice("Welcome " + cfg.Session.Handle)
 	} else {
 		// login failed
-		pkg.Log.Error("Login failed")
-		pkg.Log.Notice("Check credentials and retry")
+		Log.Error("Login failed")
+		Log.Notice("Check credentials and retry")
 	}
 	return
 }
@@ -83,7 +82,7 @@ func addTmplt() {
 	for name := range cln.LangID {
 		lName = append(lName, name)
 	}
-	pkg.Log.Info("For detailed instructions, read https://github.com/infixint943/cf/wiki/Configuration")
+	Log.Info("For detailed instructions, read https://github.com/cp-tools/cf/wiki/Configuration")
 	tmplt := cfg.Template{}
 	err := survey.Ask([]*survey.Question{
 		{
@@ -164,7 +163,7 @@ func addTmplt() {
 			},
 		},
 	}, &tmplt)
-	pkg.PrintError(err, "")
+	PrintError(err, "")
 	// set ext and langid values manually
 	tmplt.Ext = filepath.Ext(tmplt.Path)
 	tmplt.LangID = cln.LangID[tmplt.LangName]
@@ -172,7 +171,7 @@ func addTmplt() {
 	cfg.Templates = append(cfg.Templates, tmplt)
 	cfg.SaveTemplates()
 
-	pkg.Log.Success("Template saved successfully")
+	Log.Success("Template saved successfully")
 	return
 }
 
@@ -180,7 +179,7 @@ func remTmplt() {
 	// check if any templates are present
 	sz := len(cfg.Templates)
 	if sz == 0 {
-		pkg.Log.Error("No configured template's exist")
+		Log.Error("No configured template's exist")
 		return
 	}
 
@@ -189,19 +188,19 @@ func remTmplt() {
 		Message: "Template you want to remove:",
 		Options: cfg.ListTmplts(cfg.Templates...),
 	}, &idx)
-	pkg.PrintError(err, "")
+	PrintError(err, "")
 	// delete the template from the slice
 	// and reconfigure default template settings
 	cfg.Templates = append(cfg.Templates[:idx], cfg.Templates[idx+1:]...)
 	if cfg.Settings.DfltTmplt == idx {
-		pkg.Log.Warning("Default template configurations reset")
+		Log.Warning("Default template configurations reset")
 		cfg.Settings.DfltTmplt = -1
 		cfg.Settings.GenOnFetch = false
 		cfg.SaveSettings()
 	}
 	cfg.SaveTemplates()
 
-	pkg.Log.Success("Templated removed successfully")
+	Log.Success("Templated removed successfully")
 	return
 }
 
@@ -217,7 +216,7 @@ func miscPrefs() {
 			"Set workspace name",
 		},
 	}, &choice)
-	pkg.PrintError(err, "")
+	PrintError(err, "")
 
 	switch choice {
 	case 0:
@@ -227,7 +226,7 @@ func miscPrefs() {
 			Options: append([]string{"None"}, cfg.ListTmplts(cfg.Templates...)...),
 		}, &cfg.Settings.DfltTmplt)
 		cfg.Settings.DfltTmplt--
-		pkg.PrintError(err, "")
+		PrintError(err, "")
 
 	case 1:
 		// set GenOnFetch
@@ -237,7 +236,7 @@ func miscPrefs() {
 				"Default template has to be configured for this feature to work",
 			Default: false,
 		}, &cfg.Settings.GenOnFetch)
-		pkg.PrintError(err, "")
+		PrintError(err, "")
 
 	case 2:
 		// set host domain
@@ -250,7 +249,7 @@ func miscPrefs() {
 			_, err := url.ParseRequestURI(ans.(string))
 			return err
 		}))
-		pkg.PrintError(err, "")
+		PrintError(err, "")
 
 	case 3:
 		// validate and set proxy
@@ -268,7 +267,7 @@ func miscPrefs() {
 			_, err := url.ParseRequestURI(ans.(string))
 			return err
 		}))
-		pkg.PrintError(err, "")
+		PrintError(err, "")
 
 	case 4:
 		err := survey.AskOne(&survey.Input{
@@ -277,10 +276,10 @@ func miscPrefs() {
 				"A root directory will be created of this name, and all problems will be fetched here.\n" +
 				"Current configured workspace name: " + cfg.Settings.WSName,
 		}, &cfg.Settings.WSName, survey.WithValidator(survey.Required))
-		pkg.PrintError(err, "")
+		PrintError(err, "")
 	}
 	cfg.SaveSettings()
 
-	pkg.Log.Success("Configurations successfully set")
+	Log.Success("Configurations successfully set")
 	return
 }

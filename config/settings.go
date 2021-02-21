@@ -1,23 +1,23 @@
 package cfg
 
 import (
-	pkg "cf/packages"
-
 	"encoding/json"
 	"io/ioutil"
 	"os"
 )
 
-// Settings holds configured settings data of the tool
-var Settings struct {
-	DfltTmplt  int    `json:"default_template"`
-	GenOnFetch bool   `json:"gen_on_fetch"`
-	Host       string `json:"host"`
-	Proxy      string `json:"proxy"`
-	WSName     string `json:"workspace_name"`
-}
+var (
+	// Settings holds configured settings data of the tool
+	Settings struct {
+		DfltTmplt  int    `json:"default_template"`
+		GenOnFetch bool   `json:"gen_on_fetch"`
+		Host       string `json:"host"`
+		Proxy      string `json:"proxy"`
+		WSName     string `json:"workspace_name"`
+	}
 
-var settPath string
+	settPath string
+)
 
 func init() {
 	// initialise default values of Settings struct
@@ -29,24 +29,30 @@ func init() {
 }
 
 // InitSettings reads settings.json file
-func InitSettings(path string) {
+func InitSettings(path string) error {
 	// set settings.json file path
 	settPath = path
 
-	file, err := ioutil.ReadFile(settPath)
+	file, err := os.OpenFile(settPath, os.O_RDWR|os.O_CREATE, 0666)
+	defer file.Close()
 	if err != nil {
-		pkg.Log.Warning("File settings.json doesn't exist")
-		pkg.Log.Info("Creating settings.json file")
-		SaveSettings()
+		return err
 	}
-	json.Unmarshal(file, &Settings)
+
+	body, _ := ioutil.ReadAll(file)
+	json.Unmarshal(body, &Settings)
+	return nil
 }
 
 // SaveSettings to settings.json file
-func SaveSettings() {
-	file, err := os.Create(settPath)
-	pkg.PrintError(err, "Failed to create settings.json file")
+func SaveSettings() error {
+	// create settings.json file
+	file, err := os.OpenFile(settPath, os.O_TRUNC|os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
+		return err
+	}
 
 	body, _ := json.MarshalIndent(Settings, "", "\t")
 	file.Write(body)
+	return nil
 }
