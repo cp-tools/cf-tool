@@ -83,7 +83,7 @@ func addTmplt() {
 	for name := range cln.LangID {
 		lName = append(lName, name)
 	}
-	pkg.Log.Info("For detailed instructions, read https://github.com/infixint943/cf/wiki/Configuration")
+	pkg.Log.Info("For detailed instructions, read https://github.com/cp-tools/cf/wiki/Configuration")
 	tmplt := cfg.Template{}
 	err := survey.Ask([]*survey.Question{
 		{

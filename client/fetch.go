@@ -58,7 +58,6 @@ func FetchProbs(contest string, link url.URL) ([]string, error) {
 // Returns 2d slice mapping to input and output
 // If problem == "", fetch all problem test cases
 // else, only fetch of given problem.
-// fix for https://github.com/infixint943/cf/pull/2#issuecomment-626122011
 func FetchTests(contest, problem string, link url.URL) ([][]string, [][]string, error) {
 
 	c := cfg.Session.Client

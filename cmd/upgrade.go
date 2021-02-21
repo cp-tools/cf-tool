@@ -18,7 +18,7 @@ func RunUpgrade() {
 	// parse current version
 	cVers := semver.MustParse(Version)
 	// determine latest release version using github API
-	link := "https://api.github.com/repos/infixint943/cf/releases/latest"
+	link := "https://api.github.com/repos/cp-tools/cf/releases/latest"
 	resp, err := pkg.GetReqBody(&http.Client{}, link)
 	pkg.PrintError(err, "Failed to fetch latest release")
 
@@ -48,7 +48,7 @@ func RunUpgrade() {
 		return
 	}
 	// url of tar file to download
-	link = fmt.Sprintf("https://github.com/infixint943/cf/releases/download/%v/cf_%v_%v.tar.gz",
+	link = fmt.Sprintf("https://github.com/cp-tools/cf/releases/download/%v/cf_%v_%v.tar.gz",
 		latest, runtime.GOOS, runtime.GOARCH)
 
 	pkg.Log.Info("Downloading update. Please wait.")
